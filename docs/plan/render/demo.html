@@ -479,12 +479,15 @@ img.cv { aspect-ratio: 2 / 3; object-fit: cover; background: var(--card-3); max-
 .nd-sec { display: grid; gap: 14px; }
 .nd-sec > p { max-width: 70ch; }
 .nd-stack { display: grid; border-top: 1px solid var(--line); }
-.nd-row { display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1.5fr) minmax(0, 1.3fr); gap: 4px 20px; align-items: baseline; padding: 12px 10px; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--fg); text-align: left; cursor: pointer; }
+.nd-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr) minmax(0, 0.8fr); gap: 4px 20px; align-items: baseline; padding: 12px 10px; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--fg); text-align: left; cursor: pointer; }
 .nd-row:hover { background: var(--card); }
 .nd-row[aria-pressed="true"] { background: color-mix(in oklab, var(--accent) 9%, var(--card)); }
 .nd-row:disabled { cursor: default; }
 .nd-row:disabled:hover { background: none; }
-.nd-row .ly { font-size: 13.5px; color: var(--sec); }
+.nd-row.nd-head { cursor: default; padding-block: 8px; font: 500 11.5px/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sec); }
+.nd-row.nd-head:hover { background: none; }
+.nd-row .vd { font-size: 13.5px; font-weight: 500; color: var(--good); }
+.nd-row .vd.lab { color: var(--accent-ink); }
 .nd-row .role { font-size: 14px; color: var(--sec); }
 .nd-kinds { display: grid; gap: 12px; }
 .nd-kind { display: grid; gap: 8px; align-content: start; padding: 16px; border-radius: 8px; background: var(--card); }
@@ -502,6 +505,7 @@ img.cv { aspect-ratio: 2 / 3; object-fit: cover; background: var(--card-3); max-
   .nd-bar .grow { display: none; }
   .nd-map { padding: 8px 6px; }
   .nd-row { grid-template-columns: minmax(0, 1fr); }
+  .nd-row.nd-head { display: none; }
   .nd-detail dl { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .nd-detail dd { margin-bottom: 8px; }
 }
@@ -734,16 +738,16 @@ img.cv { aspect-ratio: 2 / 3; object-fit: cover; background: var(--card-3); max-
       "w.doc": ["A/B-test math on your own report: each keyword is compared with your book's average (a beta-binomial model).", "It is not an experiment: Amazon decides who sees each keyword, so it tells you what loses money, not why.", "Break-even = cost per click ÷ what you earn per sale.", "The file is read in the browser; nothing is uploaded."],
       "w.luck": ["An exact test on the two sales counts, adjusted for the number of days.", "A before/after check, not an experiment: a holiday or a review can move sales too. For a sure answer about a cover or a title, run a Duel.", "It says “can't tell yet” instead of guessing."],
       "nav.nerds": "For nerds", "nd.more": "See the whole machine →",
-      "nd.h": "For nerds: the machine behind the screen.", "nd.p": "Follow one vote from a reader's phone to the public library. Every piece runs on a free plan: $0.",
+      "nd.h": "For nerds: the machine behind the screen.", "nd.p": "Follow one vote from a reader's phone to the public library. The product runs on AWS's free allowances and the data on Databricks Free Edition: $0 out of pocket, except a few cents of S3 requests.",
       "nd.chip": "Planned · not built yet", "nd.cta1": "Follow a vote", "nd.cta2": "Run the 06:00 job", "nd.win": "pipeline · live",
       "nd.follow": "Follow", "nd.show": "Show", "nd.all": "Everything", "nd.pause": "Pause motion", "nd.resume": "Resume motion",
-      "nd.hint": "Tap any box to see what it does, where it lives in the repo and why it's built that way. Or follow a story.",
+      "nd.hint": "Tap any box to see what it does, where it lives in the repo and why it was necessary. Or follow a story.",
       "nd.step": "Step {i} of {n}", "nd.prev": "Previous step", "nd.next": "Next step", "nd.play": "Play the story", "nd.hold": "Pause the story", "nd.close": "Close the story",
       "nd.lit": "Lit up: the boxes that use {t}.",
-      "nd.what": "What it does", "nd.where": "Where it lives", "nd.why": "Why this way", "nd.cost": "Cost",
+      "nd.what": "What it does", "nd.where": "Where it lives", "nd.why": "Why it was necessary", "nd.cost": "Cost",
       "nd.read": "How to read the map",
-      "nd.read.l": ["Top: what happens in seconds while a reader votes. Your browser keeps the Ad Doctor and Real or luck? to itself.", "Middle: what the 06:00 run starts every day, numbered 1 to 7.", "Bottom: three colored lanes, one per kind of data. Each color stays on its lane up to its page, so simulated data never reaches the library."],
-      "nd.stack.h": "The stack we count on today", "nd.stack.p": "Tap a row to light its boxes on the map. Versions are checked again when each phase starts.",
+      "nd.read.l": ["Top, on AWS: what happens in seconds while a reader votes (CloudFront, Lambda, DynamoDB, and Step Functions for each Duel's life). Your browser keeps the Ad Doctor and Real or luck? to itself.", "Middle: what the 06:00 GitHub Actions run starts every day, numbered 1 to 8.", "Bottom: three colored lanes, one per kind of data, from Kafka in GitHub Actions to S3 on AWS, then into Databricks Free Edition (the volume, Auto Loader and the Lakeflow pipeline, in Delta tables under Unity Catalog). Each color stays on its lane up to its page, so simulated data never reaches the library."],
+      "nd.stack.h": "Every piece, its real job, and a verdict", "nd.stack.p": "The verdicts of the plan (v4.0, §3.0). Real means it does a job the product needs; Lab means practice paid by the AWS sign-up credits, clearly labelled. Tap a row to light its boxes on the map.", "nd.col.p": "Piece", "nd.col.j": "Its real job in this project", "nd.col.v": "Verdict",
       "nd.kinds.h": "Three kinds of data, never mixed",
     },
     es: {
@@ -851,16 +855,16 @@ img.cv { aspect-ratio: 2 / 3; object-fit: cover; background: var(--card-3); max-
       "w.doc": ["Matemática de prueba A/B sobre tu propio informe: cada palabra clave se compara con el promedio de tu libro (un modelo beta-binomial).", "No es un experimento: Amazon decide quién ve cada palabra clave, así que te dice qué pierde dinero, no por qué.", "Punto de equilibrio = costo por clic ÷ lo que ganas por venta.", "El archivo se lee en el navegador; no se sube nada."],
       "w.luck": ["Una prueba exacta sobre los dos conteos de ventas, ajustada por el número de días.", "Es una comparación de antes y después, no un experimento: un festivo o una reseña también mueven las ventas. Para una respuesta segura sobre una portada o un título, crea un duelo.", "Dice «todavía no se puede saber» en vez de adivinar."],
       "nav.nerds": "Para nerds", "nd.more": "Ver toda la máquina →",
-      "nd.h": "Para nerds: la máquina detrás de la pantalla.", "nd.p": "Sigue un voto desde el teléfono de una lectora hasta la biblioteca pública. Cada pieza corre en un plan gratis: $0.",
+      "nd.h": "Para nerds: la máquina detrás de la pantalla.", "nd.p": "Sigue un voto desde el teléfono de una lectora hasta la biblioteca pública. El producto corre en las cuotas gratis de AWS y los datos en Databricks Free Edition: $0 de tu bolsillo, salvo unos centavos de pedidos a S3.",
       "nd.chip": "Planeado · aún no construido", "nd.cta1": "Seguir un voto", "nd.cta2": "Correr el job de las 06:00", "nd.win": "pipeline · en vivo",
       "nd.follow": "Seguir", "nd.show": "Mostrar", "nd.all": "Todo", "nd.pause": "Pausar movimiento", "nd.resume": "Reanudar movimiento",
-      "nd.hint": "Toca una caja para ver qué hace, dónde vive en el repo y por qué está hecha así. O sigue una historia.",
+      "nd.hint": "Toca una caja para ver qué hace, dónde vive en el repo y por qué hizo falta. O sigue una historia.",
       "nd.step": "Paso {i} de {n}", "nd.prev": "Paso anterior", "nd.next": "Paso siguiente", "nd.play": "Reproducir la historia", "nd.hold": "Pausar la historia", "nd.close": "Cerrar la historia",
       "nd.lit": "Encendidas: las cajas que usan {t}.",
-      "nd.what": "Qué hace", "nd.where": "Dónde vive", "nd.why": "Por qué así", "nd.cost": "Costo",
+      "nd.what": "Qué hace", "nd.where": "Dónde vive", "nd.why": "Por qué hizo falta", "nd.cost": "Costo",
       "nd.read": "Cómo leer el mapa",
-      "nd.read.l": ["Arriba: lo que pasa en segundos mientras una lectora vota. Tu navegador se guarda para sí el Doctor de anuncios y ¿Real o suerte?.", "En medio: lo que arranca cada día la corrida de las 06:00, numerado del 1 al 7.", "Abajo: tres carriles de color, uno por tipo de dato. Cada color sigue en su carril hasta su página, así que los datos simulados nunca llegan a la biblioteca."],
-      "nd.stack.h": "El stack con el que contamos hoy", "nd.stack.p": "Toca una fila para encender sus cajas en el mapa. Las versiones se revisan otra vez al empezar cada fase.",
+      "nd.read.l": ["Arriba, en AWS: lo que pasa en segundos mientras una lectora vota (CloudFront, Lambda, DynamoDB, y Step Functions para la vida de cada duelo). Tu navegador se guarda para sí el Doctor de anuncios y ¿Real o suerte?.", "En medio: lo que arranca cada día la corrida de GitHub Actions de las 06:00, numerado del 1 al 8.", "Abajo: tres carriles de colores, uno por tipo de datos, desde Kafka en GitHub Actions hasta S3 en AWS, y de ahí a Databricks Free Edition (el volumen, Auto Loader y el pipeline Lakeflow, en tablas Delta bajo Unity Catalog). Cada color sigue su carril hasta su página, así que los datos simulados nunca llegan a la biblioteca."],
+      "nd.stack.h": "Cada pieza, su trabajo real y un veredicto", "nd.stack.p": "Los veredictos del plan (v4.0, §3.0). Real quiere decir que hace un trabajo que el producto necesita; Lab quiere decir práctica pagada con los créditos de registro de AWS, bien etiquetada. Toca una fila para encender sus cajas en el mapa.", "nd.col.p": "Pieza", "nd.col.j": "Su trabajo real en este proyecto", "nd.col.v": "Veredicto",
       "nd.kinds.h": "Tres tipos de datos, nunca mezclados",
     },
   };
@@ -1556,8 +1560,9 @@ Auto - Lo que el mar,Auto,amor a primera vista libro,1870,10,$3.00,1,$4.99`;
     const stories = N.STORIES.map((st) => `<button type="button" class="pillbtn" data-act="nstory" data-story="${st.k}" aria-pressed="${s.story === st.k}">${kinds.includes(st.kind) || st.kind === "ctrl" ? `<span class="sw ${st.kind}"></span>` : ""}${esc(tx(st.t))}</button>`).join("");
     const filters = [["", t("nd.all")], ...["real", "public", "sim", "ctrl"].map((k) => [k, tx(N.KINDS[k].label)])]
       .map(([k, label]) => `<button type="button" class="pillbtn" data-act="nfilter" data-kind="${k}" aria-pressed="${(s.filter || "") === k}">${k ? `<span class="sw ${k}"></span>` : ""}${esc(label)}</button>`).join("");
-    const stack = N.TOOLS.map((tl, i) => `<button type="button" class="nd-row" data-act="ntool" data-i="${i}" aria-pressed="${s.tool === i}"${tl.nodes.length ? "" : " disabled"}>` +
-      `<span class="ly">${esc(tx(tl.layer))}</span><span class="tech">${esc(tx(tl.name))}${tl.lab ? ' <span class="chip">Lab</span>' : ""}</span><span class="role">${esc(tx(tl.role))}</span></button>`).join("");
+    const stack = `<div class="nd-row nd-head" aria-hidden="true"><span>${esc(t("nd.col.p"))}</span><span>${esc(t("nd.col.j"))}</span><span>${esc(t("nd.col.v"))}</span></div>` +
+      N.TOOLS.map((tl, i) => `<button type="button" class="nd-row" data-act="ntool" data-i="${i}" aria-pressed="${s.tool === i}"${tl.nodes.length ? "" : " disabled"}>` +
+      `<span class="tech">${esc(tx(tl.name))}</span><span class="role">${esc(tx(tl.role))}</span><span class="vd${tl.lab ? " lab" : ""}">${esc(tx(tl.verdict))}</span></button>`).join("");
     const kindCards = kinds.map((k) => `<article class="nd-kind"><span class="row1">${laneSample(k)}<b>${esc(tx(N.KINDS[k].label))}</b></span>` +
       `<p class="muted">${esc(tx(N.KINDS[k].note))}</p><p>${esc(tx(N.KINDS[k].ends))}</p></article>`).join("");
     return `<div class="nerds">

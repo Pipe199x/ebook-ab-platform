@@ -2,8 +2,9 @@
 // It feeds the demo's "For nerds" tab (docs/plan/render/demo.html, inlined by tools/build_companion.py), and the plan
 // (docs/plan/PLAN.pdf, section 3) shows it. No dependencies and no network: every icon is drawn here.
 // Organized like a delivery service (letters, a mailbox, a mail truck, a post office, sorting rooms, addresses), with the
-// three kinds of data as colored lanes that never cross. Kafka carries only the simulated store: Duel votes travel as
-// files (plan v3.0, D30).
+// three kinds of data as colored lanes that never cross. Plan v4.0 is a hybrid: the Duel service on AWS's free allowances
+// (CloudFront, Lambda, DynamoDB, Step Functions), Kafka inside the GitHub Actions run for the simulated store only, S3 as
+// the landing zone and replay log, and the Delta lakehouse on Databricks Free Edition. Duel votes travel as files (D30).
 (function (root) {
   "use strict";
   const L = (en, es) => ({ en, es });
@@ -17,68 +18,96 @@
       ends: L("Fills the Duel library. A group shows numbers only after 5 results.", "Llena la biblioteca de duelos. Un grupo muestra números solo con 5 resultados.") },
     public: { label: L("Real public tests", "Pruebas públicas reales"), note: L("Upworthy headlines, Gutenberg catalog", "titulares de Upworthy, catálogo de Gutenberg"),
       ends: L("Becomes the Real lessons and the tools' realistic expectations.", "Se vuelve las Lecciones reales y las expectativas realistas de las herramientas.") },
-    sim: { label: L("Simulated", "Simulado"), note: L("70,000 fictional shoppers", "70.000 compradores ficticios"),
+    sim: { label: L("Simulated", "Simulado"), note: L("70,000 fictional shoppers, through Kafka", "70.000 compradores ficticios, por Kafka"),
       ends: L("Runs the platform every day and checks the math against a known answer. Never enters the library.", "Mueve la plataforma cada día y prueba la matemática contra una respuesta conocida. Nunca entra a la biblioteca.") },
-    ctrl: { label: L("Who starts what", "Quién arranca qué"), note: L("the 06:00 daily run", "la corrida diaria de las 06:00") },
+    ctrl: { label: L("Who starts what", "Quién arranca qué"), note: L("the 06:00 GitHub Actions run", "la corrida de GitHub Actions de las 06:00") },
   };
 
   /* ---------- The boxes: a title, a short title for small tiles, a plain-world analogy and a machine note ---------- */
   const NODES = {
     reader: { icon: "phone", kind: "real", t: L("A reader's phone", "El teléfono de una lectora"), ts: L("A reader", "Una lectora"), a: L("writes the letter", "escribe la carta"), m: L("A or B, at random", "A o B, al azar") },
-    mailbox: { icon: "mailbox", kind: "real", t: L("Cloudflare Worker + D1", "Cloudflare Worker + D1"), ts: L("Worker + D1", "Worker + D1"), a: L("the mailbox", "el buzón"), m: L("counts only", "solo conteos") },
-    writer: { icon: "laptop", kind: "real", t: L("The writer's progress", "El progreso de la autora"), ts: L("The writer", "La autora"), a: L("no peeking at winners", "sin espiar al ganador"), m: L("opens at 330", "se abre en 330") },
+    writer: { icon: "laptop", kind: "real", t: L("The writer's progress", "El progreso de la autora"), ts: L("The writer", "La autora"), a: L("no peeking", "sin espiar"), m: L("opens at 330", "se abre en 330") },
+    cdn: { icon: "door", kind: "real", t: L("Amazon CloudFront", "Amazon CloudFront"), ts: L("CloudFront", "CloudFront"), a: L("the front door", "la puerta"), m: L("site · /v1 · covers", "sitio · /v1 · portadas") },
+    lambda: { icon: "lambda", kind: "real", t: L("AWS Lambda", "AWS Lambda"), ts: L("Lambda", "Lambda"), a: L("the clerk", "el empleado"), m: L("function URL", "function URL") },
+    dynamo: { icon: "mailbox", kind: "real", t: L("Amazon DynamoDB", "Amazon DynamoDB"), ts: L("DynamoDB", "DynamoDB"), a: L("the mailbox", "el buzón"), m: L("counts only", "solo conteos") },
+    sfn: { icon: "calendar", kind: "real", t: L("AWS Step Functions", "AWS Step Functions"), ts: L("Step Functions", "Step Functions"), a: L("the calendar", "el calendario"), m: L("day 14 · day 30", "día 14 · día 30") },
     doctor: { icon: "doctor", t: L("Ad Doctor", "Doctor de anuncios"), a: L("a check-up at home", "un chequeo en casa"), m: L("Amazon Ads CSV", "CSV de Amazon Ads") },
     luck: { icon: "dice", t: L("Real or luck?", "¿Real o suerte?"), a: L("a second opinion", "una segunda opinión"), m: L("two sales counts", "dos conteos de ventas") },
     daily: { icon: "clock", t: L("GitHub Actions", "GitHub Actions"), a: L("the mail truck", "el camión del correo"), m: L("cron 11:00 UTC", "cron 11:00 UTC") },
-    votes: { icon: "letters", kind: "real", t: L("Duel votes", "Votos del Duelo"), m: L("from D1", "desde D1") },
+    votes: { icon: "letters", kind: "real", t: L("Duel votes", "Votos del Duelo"), m: L("daily file", "archivo diario") },
     sim: { icon: "shoppers", kind: "sim", t: L("Simulator", "Simulador"), m: L("70,000 fictional", "70.000 ficticios") },
     open: { icon: "opendata", kind: "public", t: L("Open data", "Datos abiertos"), m: L("Upworthy Gutenberg", "Upworthy Gutenberg") },
-    kafka: { icon: "pigeonholes", t: L("Kafka", "Kafka"), a: L("the post office", "la oficina de correos") },
-    dock: { icon: "dock", t: L("Bridge + volume", "Puente + volumen"), a: L("the loading dock", "el muelle de carga") },
+    kafka: { icon: "pigeonholes", t: L("Kafka + bridge", "Kafka + puente"), a: L("the post office", "la oficina de correos") },
+    s3: { icon: "bucket", t: L("Amazon S3", "Amazon S3"), a: L("the archive room", "el archivo") },
+    volume: { icon: "dock", t: L("Volume + Auto Loader", "Volumen + Auto Loader"), ts: L("Auto Loader", "Auto Loader"), a: L("the loading dock", "el muelle de carga") },
     bronze: { icon: "bronze", t: L("Bronze", "Bronze"), a: L("the original letters", "las cartas originales") },
     silver: { icon: "silver", t: L("Silver", "Silver"), a: L("checked copies", "copias revisadas") },
     gold: { icon: "gold", t: L("Gold", "Gold"), a: L("the summaries", "los resúmenes") },
     stats: { icon: "scale", t: L("Statistics", "Estadística"), a: L("the referee", "el árbitro") },
-    pages: { icon: "browser", t: L("GitHub Pages", "GitHub Pages"), a: L("the addresses", "las direcciones"), m: L("React · Vite", "React · Vite") },
+    pipeline: { icon: "gears", t: L("Lakeflow pipeline + Job", "Pipeline Lakeflow + Job"), ts: L("Lakeflow", "Lakeflow"), a: L("the floor plan", "el plano"), m: L("serverless", "serverless") },
+    delta: { icon: "delta", t: L("Delta Lake", "Delta Lake"), a: L("the filing system", "el archivador"), m: L("time travel · CDC", "time travel · CDC") },
+    uc: { icon: "lock", t: L("Unity Catalog", "Unity Catalog"), ts: L("Unity Catalog", "Unity Catalog"), a: L("the front desk", "la recepción"), m: L("grants · masks", "permisos · máscaras") },
+    pages: { icon: "browser", t: L("Static site", "Sitio estático"), a: L("the addresses", "las direcciones"), m: L("S3 · React", "S3 · React") },
     library: { icon: "shelf", kind: "real", t: L("Duel library", "Biblioteca de duelos"), m: L("for writers", "para quien escribe") },
     store: { icon: "shop", kind: "sim", t: L("Test store", "Tienda de prueba"), m: L("for recruiters", "para quien recluta") },
     lessons: { icon: "paper", kind: "public", t: L("Real lessons", "Lecciones reales"), m: L("for writers", "para quien escribe") },
   };
-  // What a box's card says when it is tapped: what it does, where it lives in the repo, why it is built this way, what it costs.
+  // What a box's card says when it is tapped: what it does, where it lives in the repo, why it was necessary (the
+  // interview answers of plan v4.0 §3.0, shortened) and what it costs.
   const FREE = L("$0", "$0");
   const DETAILS = {
     reader: { what: L("The reader opens the Duel link and sees one version, picked at random from a hash of the Duel and the visitor. One tap answers “Would you read the first page?”", "La lectora abre el enlace del duelo y ve una sola versión, elegida al azar con un hash del duelo y de la visitante. Un toque responde «¿Leerías la primera página?»."),
       where: "web/src/pages/duel (reader view)", why: L("One version per person and hidden votes make it a real A/B test, not a poll.", "Una versión por persona y votos ocultos lo vuelven una prueba A/B de verdad, no una encuesta."), cost: FREE },
-    mailbox: { what: L("A Cloudflare Worker receives each vote and keeps counts in a D1 database: no cookies, no names, one vote per visitor and Duel. The IP is never kept longer than a day. It also keeps the results writers choose to share.", "Un Worker de Cloudflare recibe cada voto y guarda conteos en una base D1: sin cookies, sin nombres, un voto por visitante en cada duelo. La IP nunca se guarda más de un día. También guarda los resultados que las autoras deciden compartir."),
-      where: "edge/src/worker.ts, edge/schema.sql, wrangler.toml", why: L("The only server in the project, free and with no card: 100,000 requests and 100,000 written rows a day, 500 MB per database.", "El único servidor del proyecto, gratis y sin tarjeta: 100.000 pedidos y 100.000 filas escritas al día, 500 MB por base."), cost: L("$0 (Workers Free + D1 Free)", "$0 (Workers Free + D1 Free)") },
-    writer: { what: L("The progress page shows how many readers voted and whether the split looks fair, but never the winner before the target of 330 readers.", "La página de progreso muestra cuántos lectores votaron y si el reparto se ve justo, pero nunca el ganador antes de la meta de 330 lectores."),
-      where: "web/src/pages/duel (progress), edge/ (counts)", why: L("Stopping on a lucky streak is how people pick the wrong cover. The rules are set before the game.", "Parar con una racha de suerte es como se elige la portada equivocada. Las reglas se fijan antes del partido."), cost: FREE },
+    writer: { what: L("The progress page shows how many readers voted and whether the split looks fair, but never the winner before the target of 330 readers. The server refuses to send the answers early.", "La página de progreso muestra cuántos lectores votaron y si el reparto se ve justo, pero nunca el ganador antes de la meta de 330 lectores. El servidor se niega a mandar las respuestas antes."),
+      where: "web/src/pages/duel (progress), edge/src", why: L("Stopping on a lucky streak is how people pick the wrong cover. The rules are set before the game.", "Parar con una racha de suerte es como se elige la portada equivocada. Las reglas se fijan antes del partido."), cost: FREE },
+    cdn: { what: L("Serves the static React site from a private S3 bucket, routes /v1/* to the Duel Lambda and /covers/* to the covers bucket, all from one domain, with a WAF rate rule on /v1/*.", "Sirve el sitio estático en React desde un bucket privado de S3, manda /v1/* a la Lambda del duelo y /covers/* al bucket de portadas, todo desde un dominio, con una regla de WAF que limita /v1/*."),
+      where: "infra/stacks/site.py, web/", why: L("One public door: no CORS, one place for a rate limit, and no credential ever reaches the browser. The site's data is small JSON written by the daily run, so a page never runs a query, and the flat-rate plan never bills overages.", "Una sola puerta pública: sin CORS, un solo lugar para limitar y ninguna credencial llega al navegador. Los datos del sitio son JSON pequeños que escribe la corrida diaria, así que una página nunca corre una consulta, y el plan de tarifa plana nunca cobra excedentes."),
+      cost: L("$0 (flat-rate Free plan: 1 M requests, 100 GB)", "$0 (plan Free de tarifa plana: 1 M pedidos, 100 GB)") },
+    lambda: { what: L("The Duel service's handlers in TypeScript: create a Duel, take a vote, show progress, share a result. Also the daily export of votes out of DynamoDB and a job that rotates the daily salt at midnight UTC.", "Los manejadores del servicio del duelo en TypeScript: crear un duelo, recibir un voto, mostrar el progreso, compartir un resultado. También el export diario de votos desde DynamoDB y un job que cambia la sal diaria a medianoche UTC."),
+      where: "edge/src, lambdas/, infra/stacks/edge.py", why: L("Everything short and event-driven fits Lambda's free million requests a month. Function URLs with IAM auth, signed only by CloudFront, replace API Gateway, whose free tier ends after a year. The rule: Spark goes to Databricks; anything under 15 minutes and light on data goes to Lambda.", "Todo lo corto y por eventos cabe en el millón de pedidos gratis al mes de Lambda. Las function URLs con auth IAM, firmadas solo por CloudFront, reemplazan a API Gateway, cuyo nivel gratis acaba al año. La regla: Spark va a Databricks; lo que dura menos de 15 minutos y mueve pocos datos va a Lambda."),
+      cost: L("$0 (1 M requests, 400,000 GB-s a month)", "$0 (1 M pedidos, 400.000 GB-s al mes)") },
+    dynamo: { what: L("Stores Duels and counts. A vote is one conditional write of a hash of date + IP + Duel, with a salt that changes every day, then one counter update. The IP is never stored.", "Guarda duelos y conteos. Un voto es una escritura condicional de un hash de fecha + IP + duelo, con una sal que cambia cada día, y luego un contador. La IP nunca se guarda."),
+      where: "edge/src/votes.ts, edge/test (D34, D49, D56)", why: L("The conditional write is the one-vote-per-visitor rule: atomic, with no race. Provisioned capacity inside the free 25 writes a second means a burst of readers slows down instead of billing; at real scale it would switch to on-demand.", "La escritura condicional es la regla de un voto por visitante: atómica, sin carreras. La capacidad aprovisionada dentro de las 25 escrituras por segundo gratis hace que una ola de lectores vaya más lento en vez de cobrar; a escala real pasaría a on-demand."),
+      cost: L("$0 (25 reads + 25 writes a second, 25 GB)", "$0 (25 lecturas + 25 escrituras por segundo, 25 GB)") },
+    sfn: { what: L("Creating a Duel starts one execution: wait until day 14, close the Duel if 330 readers haven't already, wait until 30 days after the end, delete the covers, done.", "Crear un duelo arranca una ejecución: esperar al día 14, cerrar el duelo si 330 lectores no lo cerraron antes, esperar 30 días después del final, borrar las portadas, listo."),
+      where: "infra/statemachines/duel_lifecycle.asl.json", why: L("Long timers per Duel, with a visible history. A nightly cleanup would scan every Duel to find the ones due; the state machine knows, and its history proves the covers were really deleted, which the privacy promise needs.", "Temporizadores largos por duelo, con historia visible. Una limpieza nocturna tendría que revisar cada duelo para hallar los que vencen; la máquina de estados lo sabe, y su historia prueba que las portadas se borraron de verdad, como exige la promesa de privacidad."),
+      cost: L("$0 (4,000 transitions a month ≈ 650 Duels)", "$0 (4.000 transiciones al mes ≈ 650 duelos)") },
     doctor: { what: L("Reads an Amazon Ads search-term report inside the browser and compares each keyword with the book's own average (a beta-binomial model): Stop, Keep, Luck or Wait.", "Lee en el navegador un informe de términos de búsqueda de Amazon Ads y compara cada palabra clave con el promedio del libro (un modelo beta-binomial): Parar, Mantener, Suerte o Esperar."),
-      where: "web/src/pages/doctor, web/src/stats", why: L("An ad report is private: the file never leaves the browser.", "Un informe de anuncios es privado: el archivo nunca sale del navegador."), cost: FREE },
+      where: "web/src/pages/doctor, web/src/stats", why: L("An ad report is private: the file never leaves the browser, so a writer's numbers never leave their phone.", "Un informe de anuncios es privado: el archivo nunca sale del navegador, así que los números de una autora no salen de su teléfono."), cost: FREE },
     luck: { what: L("Two sales counts, before and after a change, an exact test adjusted for the days, and an honest answer: it's real, or you can't tell yet.", "Dos conteos de ventas, antes y después de un cambio, una prueba exacta ajustada por días y una respuesta honesta: es real, o todavía no se puede saber."),
       where: "web/src/pages/luck, web/src/stats", why: L("It isn't an experiment, so for a sure answer about a cover or a title it points to a Duel.", "No es un experimento, así que para una respuesta segura sobre una portada o un título manda a un duelo."), cost: FREE },
-    daily: { what: L("Every day at 06:00 in Bogotá (11:00 UTC) a free GitHub machine runs the whole loop: Kafka, one simulated day, the bridge, the D1 export, the Databricks job, the JSON export and the site. Time limit: 30 minutes.", "Cada día a las 06:00 de Bogotá (11:00 UTC) una máquina gratis de GitHub corre todo el ciclo: Kafka, un día simulado, el puente, el export de D1, el job de Databricks, el export a JSON y el sitio. Tiempo máximo: 30 minutos."),
-      where: ".github/workflows/daily-e2e.yml (also ci.yml, deploy-dev.yml, pages.yml)", why: L("Free for public repos, and no laptop needed. A Kafka per run always works; Aiven's free Kafka powers off when idle.", "Gratis para repos públicos y sin laptop. Un Kafka por corrida siempre funciona; el Kafka gratis de Aiven se apaga cuando no se usa."), cost: FREE },
-    votes: { what: L("Each morning the new Duel votes, shared results and withdrawals are copied out of D1 into a JSONL file in the landing volume.", "Cada mañana se copian de D1 los votos nuevos, los resultados compartidos y los retiros en un archivo JSONL del volumen de llegada."),
-      where: "src/ebook_ab/realdata/, the D1 export step of daily-e2e.yml", why: L("Real votes join the same lakehouse as everything else. They go as a file, not through Kafka: a few votes a day fit in one file.", "Los votos reales entran al mismo lakehouse que todo lo demás. Van en un archivo, no por Kafka: pocos votos al día caben en un archivo."), cost: FREE },
+    daily: { what: L("Every day at 06:00 in Bogotá (11:00 UTC) one workflow runs the morning in order: Kafka and one simulated day, the bridge to S3, the vote export, the sync into the volume, the Databricks Job (it waits), the notebooks' export, then site_export and publish.", "Cada día a las 06:00 de Bogotá (11:00 UTC) un workflow corre la mañana en orden: Kafka y un día simulado, el puente a S3, el export de votos, la sincronización al volumen, el Job de Databricks (espera), el export de los notebooks, y luego site_export y publicar."),
+      where: ".github/workflows/daily-e2e.yml, infra/stacks/ci.py", why: L("Free for a public repo, and no AWS keys: GitHub signs in with OIDC, AWS trusts its token for this repository only, and each workflow can assume only its own role. Not Airflow: GitHub runs Kafka anyway and Databricks Jobs runs the Spark side; a third orchestrator would be for show.", "Gratis para un repo público y sin llaves de AWS: GitHub entra con OIDC, AWS confía en su token solo para este repositorio y cada workflow asume solo su propio rol. No Airflow: GitHub ya corre Kafka y Databricks Jobs corre la parte de Spark; un tercer orquestador sería de adorno."), cost: FREE },
+    votes: { what: L("Each morning a Lambda (export_edge) copies yesterday's new Duel votes, shared results and withdrawals out of DynamoDB into one JSONL file in S3.", "Cada mañana una Lambda (export_edge) copia de DynamoDB los votos nuevos de ayer, los resultados compartidos y los retiros en un archivo JSONL en S3."),
+      where: "lambdas/export_edge/, contracts/", why: L("Real votes join the same lakehouse as everything else. They skip Kafka on purpose: a few hundred a day fit in one file, and a broker for them would have to run all day.", "Los votos reales entran al mismo lakehouse que todo lo demás. No pasan por Kafka a propósito: unos cientos al día caben en un archivo, y un broker para ellos tendría que estar encendido todo el día."), cost: FREE },
     sim: { what: L("70,000 fictional shoppers on a real Project Gutenberg catalog. Each one gets A or B from a hash of their ID. The program plants known effects and scheduled faults.", "70.000 compradores ficticios en un catálogo real de Project Gutenberg. Cada uno recibe A o B por un hash de su ID. El programa planta efectos conocidos y fallas programadas."),
       where: "src/ebook_ab/simulator/ (backfill | live)", why: L("Real traffic costs money. A simulation with a known answer proves that the pipeline and the statistics find it.", "El tráfico real cuesta dinero. Una simulación con respuesta conocida prueba que el pipeline y la estadística la encuentran."), cost: FREE },
-    open: { what: L("4,873 real headline A/B tests from the Upworthy Research Archive (CC BY 4.0), and the Project Gutenberg catalog (CC0 metadata).", "4.873 pruebas A/B reales de titulares del Upworthy Research Archive (CC BY 4.0) y el catálogo de Project Gutenberg (metadatos CC0)."),
+    open: { what: L("4,873 real headline A/B tests from the Upworthy Research Archive (CC BY 4.0), and the Project Gutenberg catalog (CC0 metadata), uploaded to S3 as files.", "4.873 pruebas A/B reales de titulares del Upworthy Research Archive (CC BY 4.0) y el catálogo de Project Gutenberg (metadatos CC0), subidos a S3 como archivos."),
       where: "src/ebook_ab/realdata/, notebooks/12_real_headlines.py", why: L("It checks the method on experiments that really happened, and keeps the tools' expectations realistic.", "Prueba el método con experimentos que de verdad pasaron y mantiene realistas las expectativas de las herramientas."), cost: FREE },
-    kafka: { what: L("Keeps every event of the simulated store in order, keyed by shopper: market.storefront, orders, aftersales, experiments and ops. Two groups read it on their own: lakehouse-bridge (to files) and guardrail-monitor (hourly alerts on fraud, refunds and latency).", "Guarda en orden cada evento de la tienda simulada, con clave por comprador: market.storefront, orders, aftersales, experiments y ops. Lo leen dos grupos por su cuenta: lakehouse-bridge (a archivos) y guardrail-monitor (alertas por hora de fraude, reembolsos y latencia)."),
-      where: "config/topics.yml, contracts/*.schema.json, docker/compose.yml", why: L("Real use: order per shopper, two independent readers, and a restart that loses and repeats nothing. Duel votes skip it: they are few and arrive once a day.", "Uso real: orden por comprador, dos lectores independientes y un reinicio que no pierde ni repite nada. Los votos del duelo no pasan por aquí: son pocos y llegan una vez al día."), cost: FREE },
-    dock: { what: L("The lakehouse-bridge reads Kafka and writes files named topic/epoch/partition/offsets into a Unity Catalog volume, and commits only after the file is safe. Duel votes, shared results and open data land as files in landing_real/.", "El lakehouse-bridge lee Kafka y escribe archivos con nombre topic/epoch/partición/offsets en un volumen de Unity Catalog, y confirma solo cuando el archivo está a salvo. Los votos del duelo, los resultados compartidos y los datos abiertos llegan como archivos a landing_real/."),
-      where: "src/ebook_ab/bridge/, resources/uc_schemas_volume.yml", why: L("Databricks Free Edition can't reach Kafka's ports. At-least-once delivery plus file names that never repeat gives zero duplicates in Bronze.", "Databricks Free Edition no llega a los puertos de Kafka. Entrega al menos una vez y nombres de archivo que no se repiten: cero duplicados en Bronze."), cost: FREE },
-    bronze: { what: L("The raw events exactly as they arrived, with their Kafka coordinates: Auto Loader streaming tables, no parsing. Reset is disabled.", "Los eventos crudos tal como llegaron, con sus coordenadas de Kafka: tablas de streaming con Auto Loader, sin parseo. El reinicio está desactivado."),
-      where: "pipelines/ebook/bronze.py, bronze_files.py", why: L("Silver and Gold can always be rebuilt from Bronze.", "Silver y Gold siempre se pueden reconstruir desde Bronze."), cost: L("$0 (serverless, daily quota)", "$0 (serverless, cuota diaria)") },
-    silver: { what: L("Typed events without duplicates; bad records go to quarantine with a reason. Duel votes: double votes and bots out, and a fair-split check (SRM) per Duel. Personal data is hashed and masked.", "Eventos tipados y sin duplicados; los registros malos van a cuarentena con su motivo. Votos del duelo: fuera votos dobles y bots, y una revisión de reparto justo (SRM) por duelo. Los datos personales van con hash y máscara."),
-      where: "pipelines/ebook/silver_*.py, silver_users_scd2.py", why: L("Quality is enforced in the pipeline, not trusted from the source.", "La calidad se exige en el pipeline; no se confía en la fuente."), cost: FREE },
-    gold: { what: L("20 materialized views from YAML: funnels, exposures, conversion by version, guardrails and revenue, plus Duel results and the Duel library. Each view names who uses it.", "20 vistas materializadas desde YAML: embudos, exposiciones, conversión por versión, límites de seguridad e ingresos, más resultados de duelos y la biblioteca de duelos. Cada vista dice quién la usa."),
-      where: "config/gold_views.yml, pipelines/ebook/gold_factory.py", why: L("A new metric is a YAML entry, not new code.", "Una métrica nueva es una entrada de YAML, no código nuevo."), cost: FREE },
-    stats: { what: L("Checks validity first (SRM, A/A, invariants), then runs the tests written before the test: z-test, Welch, bootstrap, CUPED, Holm/BH. Validation compares each decision with the planted truth. The library summary needs 5 results per group.", "Revisa primero la validez (SRM, A/A, invariantes) y después corre las pruebas escritas de antemano: prueba z, Welch, bootstrap, CUPED, Holm/BH. La validación compara cada decisión con la verdad plantada. El resumen de la biblioteca pide 5 resultados por grupo."),
-      where: "src/ebook_ab/stats/, notebooks/10_ab_analysis.py, 11_validation.py, 13_community_summary.py", why: L("A referee who sets the rules before the game: nobody moves the goalposts after seeing the score.", "Un árbitro que fija las reglas antes del partido: nadie mueve el arco después de ver el marcador."), cost: FREE },
-    pages: { what: L("site_export turns small Gold summaries into JSON files, each checked against its schema. GitHub Pages serves the static React site in Spanish and English.", "site_export convierte resúmenes pequeños de Gold en archivos JSON, cada uno revisado contra su esquema. GitHub Pages sirve el sitio estático en React, en español e inglés."),
-      where: "src/ebook_ab/site_export/, web/, .github/workflows/pages.yml", why: L("The site never holds a Databricks token, and there is nothing to keep running.", "El sitio nunca guarda un token de Databricks y no hay nada que mantener encendido."), cost: FREE },
+    kafka: { what: L("A throwaway Kafka inside the GitHub Actions run carries the simulated store: 5 topics, 2 partitions each, keyed by shopper. Two groups read it on their own: lakehouse-bridge (files to S3) and guardrail-monitor (hourly alerts on fraud, refunds and latency).", "Un Kafka desechable dentro de la corrida de GitHub Actions lleva la tienda simulada: 5 topics de 2 particiones, con clave por comprador. Lo leen dos grupos por su cuenta: lakehouse-bridge (archivos a S3) y guardrail-monitor (alertas por hora de fraude, reembolsos y latencia)."),
+      where: "src/ebook_ab/bridge, src/ebook_ab/monitor, the kill test in tests/integration, ADR-002", why: L("One stream, several independent readers, and a restart that loses and repeats nothing: killing the bridge right after an upload left zero duplicates and zero offset gaps. Not Amazon MSK: it isn't on the Free plan, and MSK Serverless would cost about $548 a month for 20 minutes a day.", "Un flujo, varios lectores independientes y un reinicio que no pierde ni repite nada: matar el puente justo después de subir dejó cero duplicados y cero huecos de offsets. No Amazon MSK: no está en el plan Free, y MSK Serverless costaría unos $548 al mes por 20 minutos al día."), cost: FREE },
+    s3: { what: L("The durable landing zone and replay log. The bridge, export_edge and the open-data uploads write here first, with deterministic names (topic, epoch, partition, offsets), so a re-upload writes the same object with the same bytes.", "La zona de llegada durable y el registro para repetir. El puente, export_edge y las subidas de datos abiertos escriben aquí primero, con nombres deterministas (topic, época, partición, offsets), así que volver a subir escribe el mismo objeto con los mismos bytes."),
+      where: "infra/stacks/foundation.py, src/ebook_ab/tools/sync_volume.py, §3.3", why: L("The raw history must live somewhere we control. Free Edition can delete an inactive workspace and doesn't let us choose its storage, so S3 is the replay log: after a Silver rule changed, everything was rebuilt from S3 in dev.", "La historia cruda tiene que vivir en un lugar que controlamos. Free Edition puede borrar un espacio inactivo y no deja elegir su almacenamiento, así que S3 es el registro para repetir: cuando cambió una regla de Silver, todo se reconstruyó desde S3 en dev."),
+      cost: L("Cents: S3 requests have no free allowance (sign-up credits pay them in year 1)", "Centavos: los pedidos a S3 no tienen cuota gratis (los créditos de registro los pagan el año 1)") },
+    volume: { what: L("One sync step uploads only the new files from S3 into the Unity Catalog volume ops.lakehouse_files, under the same names. Auto Loader reads each new file once and records it in the pipeline's checkpoint; unexpected fields go to a rescued-data column.", "Un paso de sincronización sube solo los archivos nuevos de S3 al volumen de Unity Catalog ops.lakehouse_files, con los mismos nombres. Auto Loader lee cada archivo nuevo una vez y lo anota en el checkpoint del pipeline; los campos inesperados van a una columna de datos rescatados."),
+      where: "src/ebook_ab/tools/sync_volume.py, pipelines/ebook/bronze.py", why: L("Free Edition only reaches trusted domains, so files are pushed in rather than read from S3. Names that never repeat plus overwrites off make it exactly once: running the sync and the pipeline twice uploaded zero files and added zero rows.", "Free Edition solo llega a dominios de confianza, así que los archivos se empujan adentro en vez de leerse desde S3. Nombres que no se repiten y sobrescritura apagada lo vuelven exactamente una vez: correr la sincronización y el pipeline dos veces subió cero archivos y sumó cero filas."), cost: FREE },
+    bronze: { what: L("Ten streaming tables, loaded by Auto Loader: the raw events exactly as they arrived, with their Kafka coordinates, no parsing. Reset is disabled.", "Diez tablas de streaming que carga Auto Loader: los eventos crudos tal como llegaron, con sus coordenadas de Kafka, sin parseo. El reinicio está desactivado."),
+      where: "pipelines/ebook/bronze.py", why: L("Silver and Gold can always be rebuilt from Bronze, and Bronze from S3.", "Silver y Gold siempre se pueden reconstruir desde Bronze, y Bronze desde S3."), cost: L("$0 (serverless, daily quota)", "$0 (serverless, cuota diaria)") },
+    silver: { what: L("Typed events without duplicates (a one-hour watermark); bad records go to quarantine with the rule's name. Duel votes: double votes and bots out, and a fair-split check (SRM) per Duel. Personal data is hashed and masked. An AUTO CDC flow keeps each shopper's history (SCD type 2).", "Eventos tipados y sin duplicados (marca de agua de una hora); los registros malos van a cuarentena con el nombre de la regla. Votos del duelo: fuera votos dobles y bots, y una revisión de reparto justo (SRM) por duelo. Los datos personales van con hash y máscara. Un flujo AUTO CDC guarda la historia de cada comprador (SCD tipo 2)."),
+      where: "pipelines/ebook/silver.py, config/quality/*.yml, src/ebook_ab/quality", why: L("Bad data must not reach writers. Pipeline expectations drop failing rows into quarantine, so nothing disappears silently; two rules stop the run: an unknown topic (a wiring bug) and clear personal data in Silver (a privacy leak).", "Los datos malos no deben llegar a las autoras. Las expectativas del pipeline mandan las filas que fallan a cuarentena, así nada desaparece en silencio; dos reglas detienen la corrida: un topic desconocido (un error de cableado) y datos personales en claro en Silver (una fuga de privacidad)."), cost: FREE },
+    gold: { what: L("20 materialized views generated from one YAML file: funnels, exposures, conversion by version, guardrails and revenue, plus Duel results and the Duel library. Each view names who uses it.", "20 vistas materializadas generadas desde un archivo YAML: embudos, exposiciones, conversión por versión, límites de seguridad e ingresos, más resultados de duelos y la biblioteca de duelos. Cada vista dice quién la usa."),
+      where: "config/gold_views.yml, pipelines/ebook/gold_factory.py", why: L("A new metric is a YAML entry, not new code, and the views refresh themselves inside the pipeline.", "Una métrica nueva es una entrada de YAML, no código nuevo, y las vistas se actualizan solas dentro del pipeline."), cost: FREE },
+    stats: { what: L("Notebooks run as tasks of the daily Job: validity first (SRM, A/A, invariants), then the pre-registered tests: z-test, Welch, bootstrap, CUPED, Holm/BH. A data-quality notebook is a gate: if a check fails, the Job stops before publishing.", "Los notebooks corren como tareas del Job diario: primero la validez (SRM, A/A, invariantes), luego las pruebas registradas de antemano: prueba z, Welch, bootstrap, CUPED, Holm/BH. Un notebook de calidad es una compuerta: si una revisión falla, el Job se detiene antes de publicar."),
+      where: "src/ebook_ab/stats, notebooks/10_ab_analysis, 11_validation, 20_dq_report, tests/vectors/", why: L("Three automated proofs: the analysis finds the effects planted in the simulator (95% intervals hold the truth 93–97% of the time over 500 seeds), 1,000 fake A/A splits give about 5% false alarms, and a broken split fails the SRM check. Notebooks hold no logic, only calls to the tested library.", "Tres pruebas automáticas: el análisis encuentra los efectos plantados en el simulador (los intervalos del 95% contienen la verdad entre 93 y 97% de las veces en 500 semillas), 1.000 repartos A/A falsos dan cerca de 5% de falsas alarmas, y un reparto roto falla la revisión SRM. Los notebooks no tienen lógica, solo llaman a la librería probada."), cost: FREE },
+    pipeline: { what: L("One Lakeflow Spark Declarative Pipeline on serverless, triggered once a day by the ebook_daily Job, which then runs the notebooks. Each table is declared; the pipeline works out the order, the checkpoints and the retries. A Databricks bundle deploys it from Git.", "Un Lakeflow Spark Declarative Pipeline en serverless, que el Job ebook_daily dispara una vez al día y que después corre los notebooks. Cada tabla se declara; el pipeline resuelve el orden, los checkpoints y los reintentos. Un bundle de Databricks lo despliega desde Git."),
+      where: "pipelines/ebook/, resources/ebook_daily.job.yml, databricks.yml, ADR-003", why: L("Serverless Spark, Delta and a declarative pipeline at $0, with no cluster to size or forget. Not Glue: it has no free allowance. Free Edition is non-commercial with a daily quota, which fits a portfolio: heavy proofs were split into a weekly run.", "Spark serverless, Delta y un pipeline declarativo a $0, sin clúster que dimensionar u olvidar. No Glue: no tiene cuota gratis. Free Edition es no comercial y tiene cuota diaria, lo que encaja con un portafolio: las pruebas pesadas pasaron a una corrida semanal."),
+      cost: L("$0 (Free Edition has no payment method)", "$0 (Free Edition no tiene medio de pago)") },
+    delta: { what: L("Every Bronze, Silver and Gold table is a Delta table managed by Unity Catalog: AUTO CDC for history and withdrawals, MERGE for results, time travel for reproducible memos, and the Change Data Feed on the results table.", "Cada tabla de Bronze, Silver y Gold es una tabla Delta gestionada por Unity Catalog: AUTO CDC para la historia y los retiros, MERGE para los resultados, time travel para memos reproducibles y el Change Data Feed en la tabla de resultados."),
+      where: "pipelines/ebook/silver.py, notebooks/10_ab_analysis, ADR-006", why: L("Plain Parquet files can't be updated safely. Each decision memo records the table versions it used, so a time-travel query reproduces its exact numbers, and a writer's withdrawal really deletes their shared result. OPTIMIZE and VACUUM aren't needed at this size: they stay a labelled demo.", "Los archivos Parquet simples no se pueden actualizar con seguridad. Cada memo de decisión anota las versiones de tabla que usó, así una consulta time travel reproduce sus números exactos, y el retiro de una autora borra de verdad su resultado compartido. OPTIMIZE y VACUUM no hacen falta a este tamaño: quedan como demo etiquetada."), cost: FREE },
+    uc: { what: L("Grants (bi_readers on Gold only, pii_readers can unmask), column masks on clear personal data in Bronze, tags for law and purpose (pii, ley_1581), and lineage from each column to the Gold view it feeds. The pepper sits in a Databricks secret scope.", "Permisos (bi_readers solo en Gold, pii_readers puede quitar máscaras), máscaras de columna sobre los datos personales en claro de Bronze, etiquetas de ley y propósito (pii, ley_1581) y linaje de cada columna hasta la vista Gold que alimenta. La pimienta vive en un secret scope de Databricks."),
+      where: "resources/grants.yml, sql/verify/pii_checks.sql, ADR-005", why: L("The store's events carry fake personal data on purpose, to design as if Colombia's Ley 1581 applied. The tables live in Databricks, so Unity Catalog is the layer that really guards them; IAM guards the AWS side.", "Los eventos de la tienda traen datos personales falsos a propósito, para diseñar como si aplicara la Ley 1581 de Colombia. Las tablas viven en Databricks, así que Unity Catalog es la capa que de verdad las cuida; IAM cuida el lado de AWS."), cost: FREE },
+    pages: { what: L("site_export turns small Gold summaries into JSON files, each checked against its schema, and publishes them with the static React site to a private S3 bucket behind CloudFront, in Spanish and English.", "site_export convierte resúmenes pequeños de Gold en archivos JSON, cada uno revisado contra su esquema, y los publica con el sitio estático en React en un bucket privado de S3 detrás de CloudFront, en español e inglés."),
+      where: "src/ebook_ab/site_export/, web/, contracts/site/", why: L("The users are writers, not analysts: they need one clear answer, not a dashboard. A BI tool would charge per viewer to share publicly, and the site never holds a Databricks token.", "Las usuarias son autoras, no analistas: necesitan una respuesta clara, no un tablero. Una herramienta de BI cobraría por cada persona para compartir en público, y el sitio nunca guarda un token de Databricks."), cost: FREE },
     library: { what: L("Duel results pooled by genre, book language and what changed. A group shows numbers only after 5 results, and simulated data is never mixed in.", "Resultados de duelos agrupados por género, idioma del libro y qué cambió. Un grupo muestra números solo con 5 resultados, y nunca se mezclan datos simulados."),
       where: "web/public/data/library.json", why: L("Every Duel helps the next writer, even one who can't run a test.", "Cada duelo ayuda a la próxima autora, aunque no pueda hacer su propia prueba."), cost: FREE },
     store: { what: L("The simulated store's three decisions in plain words (wallet-first checkout: keep; new cover + subtitle: don't keep; bundle banner: keep), plus the checks on the checks.", "Las tres decisiones de la tienda simulada en palabras simples (pago con billetera primero: se queda; portada y subtítulo nuevos: no; banner de paquete: se queda), más las pruebas de las pruebas."),
@@ -87,68 +116,84 @@
       where: "notebooks/12_real_headlines.py, web/src/pages/lessons", why: L("They are news headlines, not books, so they set expectations, not promises.", "Son titulares de noticias, no libros: fijan expectativas, no promesas."), cost: FREE },
   };
   const ZONES = {
-    live: { t: L("LIVE · IN SECONDS", "EN VIVO · EN SEGUNDOS") },
-    browser: { t: L("YOUR BROWSER · NOTHING LEAVES", "TU NAVEGADOR · NADA SALE"), lock: true },
-    daily: { t: L("EVERY DAY · 06:00 BOGOTÁ · NO LAPTOP", "CADA DÍA · 06:00 BOGOTÁ · SIN LAPTOP") },
+    live: { t: L("AWS · LIVE · IN SECONDS", "AWS · EN VIVO · EN SEGUNDOS") },
+    browser: { t: L("YOUR BROWSER · NOTHING LEAVES", "TU NAVEGADOR · NADA SALE"), ts: L("YOUR BROWSER", "TU NAVEGADOR"), lock: true },
+    daily: { t: L("GITHUB ACTIONS · EVERY DAY · 06:00 BOGOTÁ", "GITHUB ACTIONS · CADA DÍA · 06:00 BOGOTÁ"), ts: L("EVERY DAY · 06:00", "CADA DÍA · 06:00") },
     sources: { t: L("SOURCES", "FUENTES"), a: L("the letters", "las cartas") },
-    dbx: { t: L("DATABRICKS FREE EDITION", "DATABRICKS FREE EDITION"), ts: L("DATABRICKS", "DATABRICKS"), a: L("the sorting rooms", "las salas de clasificación") },
-    site: { t: L("PUBLIC SITE", "SITIO PÚBLICO") },
+    gha: { t: L("GITHUB ACTIONS", "GITHUB ACTIONS"), ts: L("GITHUB", "GITHUB") },
+    aws: { t: L("AWS", "AWS") },
+    dbx: { t: L("DATABRICKS FREE EDITION", "DATABRICKS FREE EDITION"), ts: L("DATABRICKS", "DATABRICKS"), a: L("the office", "la oficina") },
+    site: { t: L("AWS · PUBLIC SITE", "AWS · SITIO PÚBLICO"), ts: L("PUBLIC SITE", "SITIO PÚBLICO") },
   };
-  // What the 06:00 run starts, in order (.github/workflows/daily-e2e.yml).
+  // What the 06:00 run starts, in order (.github/workflows/daily-e2e.yml, plan v4.0 D46).
   const STEPS = [
-    L("start Kafka", "arrancar Kafka"), L("simulate a day", "simular un día"), L("bridge", "puente"), L("export votes", "exportar votos"),
-    L("Databricks job", "job Databricks"), L("JSON", "JSON"), L("publish", "publicar"),
+    L("start Kafka", "arrancar Kafka"), L("simulate a day", "simular un día"), L("bridge → S3", "puente → S3"), L("export votes", "exportar votos"),
+    L("sync volume", "sincronizar"), L("Databricks Job", "Job Databricks"), L("site_export", "site_export"), L("publish", "publicar"),
   ];
   // Small machine notes where a lane crosses a room (wide map only).
   const TAGS = [
     ["kafka", "sim", L("market.*.v1", "market.*.v1")],
+    ["s3", "sim", L("bridge", "puente")], ["s3", "real", L("export_edge", "export_edge")], ["s3", "public", L("upload", "subida")],
+    ["volume", "sim", L("Files API", "Files API")], ["volume", "real", L("Files API", "Files API")], ["volume", "public", L("Files API", "Files API")],
     ["silver", "real", L("double votes · bots · SRM", "votos dobles · bots · SRM")], ["silver", "sim", L("PII masked", "PII oculta")],
     ["gold", "real", L("+2 views", "+2 vistas")], ["gold", "sim", L("18 views", "18 vistas")],
     ["stats", "real", L("5+ per group", "5+ por grupo")], ["stats", "sim", L("vs. the planted truth", "vs. la verdad plantada")],
-    ["stats", "public", L("random effects", "efectos aleatorios")], ["dock", "public", L("landing_real", "landing_real")],
+    ["stats", "public", L("random effects", "efectos aleatorios")],
   ];
 
-  /* ---------- Five guided stories: each step lights one box and says what happens there ---------- */
+  /* ---------- Six guided stories: each step lights one box and says what happens there ---------- */
   const STORIES = [
     { k: "vote", kind: "real", t: L("A reader's vote", "Un voto de una lectora"), steps: [
       ["reader", L("A reader opens the Duel link. A coin flip (a hash of the Duel and the visitor) shows cover A or B, never both.", "Una lectora abre el enlace del duelo. Una moneda al aire (un hash del duelo y de la visitante) le muestra la portada A o la B, nunca las dos.")],
-      ["reader", L("One tap: “Yes, I'd read it.” The vote travels to the mailbox.", "Un toque: «Sí, la leería». El voto viaja al buzón.")],
-      ["mailbox", L("A free Cloudflare Worker keeps counts in D1: no cookies, no names, and the IP is never kept longer than a day.", "Un Worker gratis de Cloudflare guarda conteos en D1: sin cookies, sin nombres, y la IP nunca se guarda más de un día.")],
-      ["writer", L("The writer sees progress, not the winner. The result opens at 330 readers: no peeking.", "La autora ve el progreso, no al ganador. El resultado se abre a los 330 lectores: sin espiar.")],
-      ["votes", L("06:00 in Bogotá: the mail truck leaves. GitHub Actions copies yesterday's new votes out of D1 into one file.", "06:00 en Bogotá: sale el camión del correo. GitHub Actions copia de D1 los votos nuevos de ayer en un archivo.")],
-      ["dock", L("The file lands in the landing volume. No Kafka here: a few votes a day fit in one file, and Auto Loader reads each file exactly once.", "El archivo llega al volumen de llegada. Aquí no hace falta Kafka: pocos votos al día caben en un archivo, y Auto Loader lee cada archivo una sola vez.")],
-      ["bronze", L("Bronze keeps the original letters, untouched.", "Bronze guarda las cartas originales, sin tocar.")],
+      ["reader", L("One tap: “Yes, I'd read it.” The phone sends one POST, with the SHA-256 of its body.", "Un toque: «Sí, la leería». El teléfono manda un POST, con el SHA-256 de su contenido.")],
+      ["cdn", L("CloudFront is the only public door. It signs the request for the Lambda's function URL; nobody can call the function directly.", "CloudFront es la única puerta pública. Firma el pedido para la function URL de la Lambda; nadie puede llamar la función directamente.")],
+      ["lambda", L("The vote Lambda checks the body against the same JSON Schema the site uses, and hashes the date, the IP and the Duel with today's salt.", "La Lambda de votos revisa el contenido contra el mismo JSON Schema que usa el sitio, y hace un hash de la fecha, la IP y el duelo con la sal de hoy.")],
+      ["dynamo", L("One conditional write in DynamoDB stores that hash only if it's new: one vote per visitor, atomic. A second write adds one to that version's count. The IP is never stored.", "Una escritura condicional en DynamoDB guarda ese hash solo si es nuevo: un voto por visitante, atómico. Una segunda escritura suma uno al conteo de esa versión. La IP nunca se guarda.")],
+      ["writer", L("The writer sees progress, not the winner. The server refuses to send the result before 330 readers: no peeking.", "La autora ve el progreso, no al ganador. El servidor no manda el resultado antes de 330 lectores: sin espiar.")],
+      ["votes", L("06:00 in Bogotá: GitHub Actions asks a Lambda to copy yesterday's new votes out of DynamoDB into one file.", "06:00 en Bogotá: GitHub Actions le pide a una Lambda copiar de DynamoDB los votos nuevos de ayer en un archivo.")],
+      ["s3", L("The file lands in S3 first, the archive room. No Kafka here: a few hundred votes a day fit in one file.", "El archivo llega primero a S3, el archivo. Aquí no hace falta Kafka: unos cientos de votos al día caben en un archivo.")],
+      ["volume", L("The sync pushes only the new file into the Unity Catalog volume, and Auto Loader reads it exactly once.", "La sincronización empuja solo el archivo nuevo al volumen de Unity Catalog, y Auto Loader lo lee una sola vez.")],
+      ["bronze", L("Bronze keeps the original letters, untouched, in a Delta table.", "Bronze guarda las cartas originales, sin tocar, en una tabla Delta.")],
       ["silver", L("Silver checks them: double votes and bots out, and a fair-split check (SRM) on every Duel.", "Silver las revisa: fuera votos dobles y bots, y una revisión de reparto justo (SRM) en cada duelo.")],
-      ["gold", L("Gold sums them up: each Duel's result and the Duel library (2 new views).", "Gold las resume: el resultado de cada duelo y la biblioteca de duelos (2 vistas nuevas).")],
+      ["gold", L("Gold sums them up: each Duel's result and the Duel library (2 views).", "Gold las resume: el resultado de cada duelo y la biblioteca de duelos (2 vistas).")],
       ["stats", L("Statistics names a winner only when it's not luck, and pools results by genre, language and change. A group shows numbers only after 5 results.", "La estadística nombra ganador solo cuando no es suerte, y agrupa por género, idioma y cambio. Un grupo muestra números solo con 5 resultados.")],
-      ["library", L("site_export writes library.json and GitHub Pages publishes it. The next writer sees what worked.", "site_export escribe library.json y GitHub Pages lo publica. La próxima autora ve qué funcionó.")],
+      ["library", L("site_export writes library.json to S3 and CloudFront serves it. The next writer sees what worked.", "site_export escribe library.json en S3 y CloudFront lo sirve. La próxima autora ve qué funcionó.")],
+    ] },
+    { k: "life", kind: "real", t: L("A Duel's life", "La vida de un duelo"), steps: [
+      ["lambda", L("A writer creates a Duel. The Lambda stores it and starts one Step Functions execution for it.", "Una autora crea un duelo. La Lambda lo guarda y arranca una ejecución de Step Functions para él.")],
+      ["sfn", L("The execution waits until the Duel's end time: 14 days. Waiting costs nothing.", "La ejecución espera hasta la hora de cierre del duelo: 14 días. Esperar no cuesta nada.")],
+      ["dynamo", L("Day 14: it closes the Duel in DynamoDB, unless 330 readers already closed it.", "Día 14: cierra el duelo en DynamoDB, salvo que 330 lectores ya lo hayan cerrado.")],
+      ["sfn", L("It waits again, until 30 days after the actual end.", "Espera otra vez, hasta 30 días después del cierre real.")],
+      ["cdn", L("It deletes the covers from the covers bucket behind CloudFront. The execution history proves they're gone: about 6 transitions per Duel.", "Borra las portadas del bucket de portadas detrás de CloudFront. La historia de la ejecución prueba que ya no están: unas 6 transiciones por duelo.")],
     ] },
     { k: "shopper", kind: "sim", t: L("A simulated shopper", "Un comprador simulado"), steps: [
-      ["sim", L("A program plays 70,000 fictional shoppers in a store with real public-domain books.", "Un programa juega a ser 70.000 compradores ficticios en una tienda con libros reales de dominio público.")],
-      ["sim", L("Each shopper gets version A or B from a hash of their ID: the same shopper always sees the same version.", "Cada comprador recibe la versión A o B según un hash de su ID: el mismo comprador siempre ve la misma.")],
-      ["kafka", L("Every click becomes an event in Kafka: storefront, orders, aftersales and experiments.", "Cada clic se vuelve un evento en Kafka: storefront, orders, aftersales y experiments.")],
-      ["bronze", L("The bridge lands the files, and Bronze keeps them as they came.", "El puente deja los archivos y Bronze los guarda tal como llegaron.")],
-      ["silver", L("Silver types and cleans them, hides personal data and sends bad records to quarantine.", "Silver los tipa y limpia, oculta los datos personales y manda a cuarentena los registros malos.")],
+      ["sim", L("A program plays 70,000 fictional shoppers in a store with real public-domain books. Each gets version A or B from a hash of their ID.", "Un programa juega a ser 70.000 compradores ficticios en una tienda con libros reales de dominio público. Cada uno recibe la versión A o B según un hash de su ID.")],
+      ["kafka", L("Every click becomes an event in Kafka, inside the GitHub Actions run: storefront, orders, aftersales and experiments, keyed by shopper.", "Cada clic se vuelve un evento en Kafka, dentro de la corrida de GitHub Actions: storefront, orders, aftersales y experiments, con clave por comprador.")],
+      ["s3", L("The bridge writes files named topic/epoch/partition/offsets to S3, and commits only after the file is safe.", "El puente escribe en S3 archivos con nombre topic/época/partición/offsets, y confirma solo cuando el archivo está a salvo.")],
+      ["volume", L("The new files are synced into the volume; Auto Loader picks up only those.", "Los archivos nuevos se sincronizan al volumen; Auto Loader toma solo esos.")],
+      ["silver", L("Bronze keeps them as they came. Silver types and cleans them, hides personal data and sends bad records to quarantine.", "Bronze los guarda tal como llegaron. Silver los tipa y limpia, oculta los datos personales y manda a cuarentena los registros malos.")],
       ["gold", L("Gold builds 18 views: funnels, exposures, conversion by version, guardrails and revenue.", "Gold arma 18 vistas: embudos, exposiciones, conversión por versión, límites de seguridad e ingresos.")],
       ["stats", L("Statistics checks the split first (SRM, A/A), then tests. Validation compares each decision with the effect we planted: the answer key.", "La estadística revisa primero el reparto (SRM, A/A) y después prueba. La validación compara cada decisión con el efecto que plantamos: la hoja de respuestas.")],
       ["store", L("The Test store page shows the three decisions in plain words. Simulated data never enters the library.", "La página Tienda de prueba muestra las tres decisiones en palabras simples. Los datos simulados nunca entran a la biblioteca.")],
     ] },
     { k: "open", kind: "public", t: L("Real headline tests", "Pruebas reales de titulares"), steps: [
       ["open", L("Real public data: 4,873 headline A/B tests from Upworthy (CC BY 4.0) and the Project Gutenberg catalog (CC0).", "Datos públicos reales: 4.873 pruebas A/B de titulares de Upworthy (CC BY 4.0) y el catálogo de Project Gutenberg (CC0).")],
-      ["dock", L("They come in as files through the Files API, without Kafka.", "Entran como archivos por la Files API, sin pasar por Kafka.")],
+      ["s3", L("They are uploaded to S3 as files, without Kafka.", "Se suben a S3 como archivos, sin pasar por Kafka.")],
+      ["volume", L("The sync copies them into the volume, under the same names.", "La sincronización los copia al volumen, con los mismos nombres.")],
       ["silver", L("Bronze keeps them as they are; Silver types them and flags the known problems.", "Bronze los guarda tal cual; Silver los tipa y marca los problemas conocidos.")],
       ["stats", L("A random-effects model learns how big real changes usually are.", "Un modelo de efectos aleatorios aprende qué tan grandes suelen ser los cambios reales.")],
       ["lessons", L("Real lessons: most changes are small, clear winners are rare, and early winners shrink. The same numbers keep the tools' expectations realistic.", "Lecciones reales: casi todos los cambios son pequeños, los ganadores claros son raros y los primeros ganadores se encogen. Esos números mantienen realistas las expectativas de las herramientas.")],
     ] },
     { k: "daily", kind: "ctrl", t: L("The 06:00 run", "La corrida de las 06:00"), steps: [
-      ["daily", L("Every day at 06:00 in Bogotá (11:00 UTC), a free GitHub machine wakes up. No laptop needed.", "Cada día a las 06:00 en Bogotá (11:00 UTC) se despierta una máquina gratis de GitHub. No hace falta laptop.")],
+      ["daily", L("Every day at 06:00 in Bogotá (11:00 UTC), a free GitHub machine wakes up and signs in to AWS with OIDC. No laptop, no AWS keys.", "Cada día a las 06:00 en Bogotá (11:00 UTC) se despierta una máquina gratis de GitHub y entra a AWS con OIDC. Sin laptop, sin llaves de AWS.")],
       ["kafka", L("1 · It starts a fresh Kafka and creates the topics.", "1 · Arranca un Kafka nuevo y crea los topics.")],
       ["sim", L("2 · The simulator plays one day of shopping: about 2,000 shoppers.", "2 · El simulador juega un día de compras: unos 2.000 compradores.")],
-      ["dock", L("3 · The bridge drains Kafka into files.", "3 · El puente vacía Kafka en archivos.")],
-      ["votes", L("4 · New Duel votes and shared results are exported from D1 into files.", "4 · Se exportan de D1 los votos nuevos y los resultados compartidos, en archivos.")],
-      ["gold", L("5 · It starts the Databricks job and waits: the pipeline, then governance, then analysis, data quality and the library side by side.", "5 · Arranca el job de Databricks y espera: el pipeline, luego gobierno, y después análisis, calidad y biblioteca a la vez.")],
-      ["stats", L("6 · site_export turns small Gold summaries into JSON files, each checked against its schema.", "6 · site_export convierte resúmenes pequeños de Gold en archivos JSON, cada uno revisado contra su esquema.")],
-      ["pages", L("7 · It builds and publishes the site. Time limit: 30 minutes.", "7 · Construye y publica el sitio. Tiempo máximo: 30 minutos.")],
+      ["s3", L("3 · The bridge drains Kafka into files in S3.", "3 · El puente vacía Kafka en archivos en S3.")],
+      ["votes", L("4 · A Lambda exports yesterday's Duel votes and shared results from DynamoDB into S3.", "4 · Una Lambda exporta de DynamoDB a S3 los votos de ayer y los resultados compartidos.")],
+      ["volume", L("5 · The sync pushes only the new files into the Unity Catalog volume.", "5 · La sincronización empuja solo los archivos nuevos al volumen de Unity Catalog.")],
+      ["pipeline", L("6 · It triggers the Databricks Job by API and waits: the Lakeflow pipeline (Bronze → Silver → Gold), then the notebooks. A failed quality gate stops everything here.", "6 · Dispara el Job de Databricks por API y espera: el pipeline Lakeflow (Bronze → Silver → Gold) y luego los notebooks. Si falla la compuerta de calidad, todo se detiene aquí.")],
+      ["stats", L("7 · It exports the executed notebooks to S3, and site_export turns small Gold summaries into JSON files, each checked against its schema.", "7 · Exporta a S3 los notebooks ejecutados, y site_export convierte resúmenes pequeños de Gold en archivos JSON, cada uno revisado contra su esquema.")],
+      ["pages", L("8 · It publishes the site's data to S3 behind CloudFront.", "8 · Publica los datos del sitio en S3 detrás de CloudFront.")],
     ] },
     { k: "doctor", kind: "browser", t: L("An Ad Doctor report", "Un informe del Doctor"), steps: [
       ["doctor", L("A writer drops an Amazon Ads report (CSV). The file is read inside the browser.", "Una autora suelta su informe de Amazon Ads (CSV). El archivo se lee dentro del navegador.")],
@@ -157,23 +202,29 @@
     ] },
   ];
 
-  /* ---------- The technologies we count on today (plan v2.3 + the lifesaver answer); versions are checked per phase ---------- */
+  /* ---------- Every piece, its real job and its verdict (plan v4.0 §3.0, "The verdict for each piece") ---------- */
+  const REAL = L("Real", "Real");
   const TOOLS = [
-    { layer: L("Languages", "Lenguajes"), name: "Python (uv) · TypeScript", role: L("all the code", "todo el código"), nodes: ["sim", "dock", "stats", "mailbox", "writer"] },
-    { layer: L("Events", "Eventos"), name: "Apache Kafka (KRaft) · confluent-kafka", role: L("the post office for the simulated store's events; Duel votes go as files", "la oficina de correos de la tienda simulada; los votos del Duelo van en archivos"), nodes: ["kafka", "sim"] },
-    { layer: L("Cloud Kafka (optional)", "Kafka en la nube (opcional)"), name: L("Aiven, free plan", "Aiven, plan gratis"), role: L("only if the Phase 0 probes allow it; the daily run brings its own Kafka", "solo si las pruebas de la Fase 0 lo permiten; la corrida diaria trae su propio Kafka"), nodes: ["kafka"] },
-    { layer: L("Contracts", "Contratos"), name: "JSON Schema", role: L("the shape of every event, checked in tests and in Silver", "la forma de cada evento, revisada en pruebas y en Silver"), nodes: ["kafka", "silver"] },
-    { layer: L("Simulator", "Simulador"), name: "Python · Faker (es_CO)", role: L("70,000 fictional shoppers on a real catalog", "70.000 compradores ficticios con catálogo real"), nodes: ["sim"] },
-    { layer: L("Lakehouse", "Lakehouse"), name: "Databricks Free Edition: Lakeflow Declarative Pipelines, Auto Loader, Unity Catalog, Delta Lake", role: L("Bronze, Silver and Gold", "Bronze, Silver y Gold"), nodes: ["dock", "bronze", "silver", "gold"] },
-    { layer: L("Jobs and deploys", "Jobs y despliegue"), name: "Lakeflow Jobs · Asset Bundles · Databricks CLI/SDK", role: L("the daily job, all from Git", "el job diario, todo desde Git"), nodes: ["bronze", "silver", "gold", "stats"] },
-    { layer: L("Statistics", "Estadística"), name: "scipy · statsmodels · ebook_ab.stats", role: L("SRM, z-test, Welch, bootstrap, CUPED, Holm/BH", "SRM, prueba z, Welch, bootstrap, CUPED, Holm/BH"), nodes: ["stats"] },
-    { layer: L("Edge", "Borde"), name: L("Cloudflare Workers + D1 (free plan)", "Cloudflare Workers + D1 (plan gratis)"), role: L("Duel votes and shared results", "votos del Duelo y resultados compartidos"), nodes: ["mailbox", "writer", "votes"] },
-    { layer: L("Site", "Sitio"), name: "React · Vite · TypeScript · ECharts · i18next · Vitest", role: L("the public site, Spanish and English", "el sitio público, en español e inglés"), nodes: ["writer", "pages", "library", "store", "lessons"] },
-    { layer: L("CI/CD and the daily run", "CI/CD y corrida diaria"), name: "GitHub Actions · GitHub Pages", role: L("tests, deploys and the 06:00 run", "pruebas, despliegues y la corrida de las 06:00"), nodes: ["daily", "pages"] },
-    { layer: L("Local compute", "Cómputo local"), name: L("Docker: Spark cluster + Delta", "Docker: clúster Spark + Delta"), lab: true, role: L("practice: a job cluster on the laptop and the Spark UI performance lab (Free Edition has no Spark UI)", "práctica: un job cluster en la laptop y el laboratorio de rendimiento con Spark UI (Free Edition no tiene Spark UI)"), nodes: ["bronze", "silver", "gold"] },
-    { layer: L("Real data", "Datos reales"), name: "Project Gutenberg (CC0) · Upworthy Research Archive (CC BY 4.0)", role: L("a real catalog and real headline tests", "un catálogo real y pruebas reales de titulares"), nodes: ["open", "sim"] },
-    { layer: L("In the browser", "En el navegador"), name: L("Plain JavaScript", "JavaScript sin dependencias"), role: L("Ad Doctor and Real or luck?", "Doctor de anuncios y ¿Real o suerte?"), nodes: ["doctor", "luck"] },
-    { layer: L("Cost", "Costo"), name: "$0", role: L("no cards, no trials, no expiring credits", "sin tarjetas, sin pruebas que vencen, sin créditos que caducan"), nodes: [] },
+    { name: "Kafka", role: L("The simulated store's event stream: per-shopper order, two independent consumer groups, a restart that loses and repeats nothing", "El flujo de eventos de la tienda simulada: orden por comprador, dos grupos de consumo independientes, un reinicio que no pierde ni repite nada"), verdict: L("Real, for the store only", "Real, solo para la tienda"), nodes: ["kafka", "sim"] },
+    { name: "Amazon S3", role: L("The durable landing zone and replay log, the artifacts, the site and the covers", "La zona de llegada durable y el registro para repetir, los artefactos, el sitio y las portadas"), verdict: REAL, nodes: ["s3", "pages"] },
+    { name: "Databricks Free Edition + Lakeflow pipeline", role: L("Builds Bronze, Silver and Gold every morning, declaratively, on serverless", "Construye Bronze, Silver y Gold cada mañana, de forma declarativa, en serverless"), verdict: REAL, nodes: ["pipeline", "volume", "bronze", "silver", "gold"] },
+    { name: "Auto Loader", role: L("Reads each new file once, from the volume, with a managed checkpoint", "Lee cada archivo nuevo una vez, desde el volumen, con un checkpoint gestionado"), verdict: REAL, nodes: ["volume", "bronze"] },
+    { name: "Delta Lake", role: L("AUTO CDC for SCD2 and withdrawals, MERGE for results, time travel for reproducible memos, Change Data Feed", "AUTO CDC para SCD2 y retiros, MERGE para resultados, time travel para memos reproducibles, Change Data Feed"), verdict: REAL, nodes: ["delta", "bronze", "silver", "gold"] },
+    { name: L("PySpark (serverless)", "PySpark (serverless)"), role: L("Parsing by schema version, hashing, dedup, the Gold SQL; statistics stop using it after aggregation", "Parseo por versión de esquema, hash, deduplicación, el SQL de Gold; la estadística deja de usarlo tras agregar"), verdict: L("Real, bigger than needed", "Real, más grande de lo necesario"), nodes: ["bronze", "silver", "gold"] },
+    { name: L("Pipeline expectations", "Expectativas del pipeline"), role: L("Quarantine in Silver; two rules stop the run", "Cuarentena en Silver; dos reglas detienen la corrida"), verdict: REAL, nodes: ["silver"] },
+    { name: "Unity Catalog", role: L("Grants, column masks, personal-data tags, lineage", "Permisos, máscaras de columna, etiquetas de datos personales, linaje"), verdict: REAL, nodes: ["uc", "volume", "bronze", "silver", "gold"] },
+    { name: L("Notebooks (Job tasks)", "Notebooks (tareas del Job)"), role: L("A readable record of every decision, and a gate before publishing", "Un registro legible de cada decisión, y una compuerta antes de publicar"), verdict: REAL, nodes: ["stats", "pipeline"] },
+    { name: "GitHub Actions + OIDC", role: L("The daily conductor (Kafka, export, sync, trigger, publish), tests, deploys; no AWS keys", "El director diario (Kafka, export, sincronización, disparo, publicación), pruebas, despliegues; sin llaves de AWS"), verdict: REAL, nodes: ["daily", "kafka"] },
+    { name: "AWS Lambda", role: L("The Duel service, the daily export, small scheduled jobs", "El servicio del duelo, el export diario, jobs pequeños programados"), verdict: REAL, nodes: ["lambda", "votes"] },
+    { name: "DynamoDB", role: L("Duels and votes, one vote per visitor, counts", "Duelos y votos, un voto por visitante, conteos"), verdict: REAL, nodes: ["dynamo", "writer"] },
+    { name: "AWS Step Functions", role: L("Each Duel's life: close on day 14, delete covers 30 days later", "La vida de cada duelo: cerrar el día 14, borrar portadas 30 días después"), verdict: REAL, nodes: ["sfn"] },
+    { name: L("CloudFront + S3 site", "CloudFront + sitio en S3"), role: L("Serves the static site, covers and the Duel API from one origin", "Sirve el sitio estático, las portadas y la API del duelo desde un origen"), verdict: REAL, nodes: ["cdn", "pages", "library", "store", "lessons"] },
+    { name: L("AWS CDK + Databricks Bundles", "AWS CDK + Databricks Bundles"), role: L("Every resource on both platforms as reviewed code, with a $0 allow-list", "Cada recurso de las dos plataformas como código revisado, con una lista de permitidos a $0"), verdict: REAL, nodes: ["cdn", "lambda", "dynamo", "sfn", "s3", "pipeline"] },
+    { name: L("JSON contracts", "Contratos JSON"), role: L("One schema per event, request and site file, shared by every reader", "Un esquema por evento, pedido y archivo del sitio, compartido por cada lector"), verdict: REAL, nodes: ["kafka", "lambda", "silver", "pages"] },
+    { name: "ebook_ab.stats + scipy", role: L("The pre-registered tests, proved against planted truth", "Las pruebas registradas de antemano, probadas contra la verdad plantada"), verdict: REAL, nodes: ["stats"] },
+    { name: "React + TypeScript", role: L("The product writers use, with in-browser math", "El producto que usan las autoras, con la matemática en el navegador"), verdict: REAL, nodes: ["reader", "writer", "doctor", "luck", "library", "store", "lessons"] },
+    { name: L("AWS Glue jobs + Spark UI", "AWS Glue jobs + Spark UI"), role: L("A skew lab on managed serverless Spark, where the Spark UI exists", "Un laboratorio de sesgo en Spark serverless gestionado, donde sí existe la Spark UI"), verdict: L("Lab (on credits)", "Lab (con créditos)"), lab: true, nodes: [] },
+    { name: L("Delta maintenance demos", "Demos de mantenimiento Delta"), role: L("OPTIMIZE, VACUUM, DESCRIBE HISTORY, RESTORE, Z-ORDER", "OPTIMIZE, VACUUM, DESCRIBE HISTORY, RESTORE, Z-ORDER"), verdict: L("Lab (time travel and CDF themselves are real)", "Lab (time travel y CDF sí son reales)"), lab: true, nodes: ["delta"] },
   ];
 
   /* ---------- Illustrated icons: 64 × 64, soft gradients and a shadow on the ground ---------- */
@@ -311,7 +362,33 @@
       `<path d="M14 27h13M14 31.4h13M14 35.8h13M14 40.2h13M14 44.6h26" stroke="#bbb2a1" stroke-width="1.6" stroke-linecap="round"/>` +
       `<rect x="30.4" y="25" width="13.6" height="15" rx="1.6" fill="${g("green")}"/>` +
       `<path class="nx-check" d="M33.6 32.6l2.8 2.8 5-5.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
-    lock: (g) => `<path d="M21 29v-7a11 11 0 0 1 22 0v7" fill="none" stroke="#8c96a3" stroke-width="5"/><rect x="14" y="28" width="36" height="28" rx="5" fill="${g("yellow")}"/>` +
+    door: (g) => `<ellipse class="sh" cx="32" cy="60.6" rx="22" ry="2.4"/><rect x="11" y="5" width="42" height="54" rx="3.6" fill="${g("slate")}"/>` +
+      `<rect x="16.4" y="10.4" width="31.2" height="48.6" rx="2" fill="${g("orange")}"/><rect x="20.6" y="15" width="22.8" height="15" rx="1.4" fill="#fff" opacity=".32"/>` +
+      `<rect x="20.6" y="34" width="22.8" height="20" rx="1.4" fill="#fff" opacity=".18"/><circle cx="42" cy="34.6" r="2.3" fill="${g("yellow")}"/>` +
+      `<g class="nx-drop"><rect x="26" y="0" width="12" height="8.6" rx="1" fill="${g("paper")}" stroke="#d6ccb4" stroke-width=".8"/></g>`,
+    lambda: (g) => `<ellipse class="sh" cx="32" cy="60.6" rx="22" ry="2.4"/><rect x="9" y="7" width="46" height="46" rx="11" fill="${g("orange")}"/>` +
+      `<rect class="nx-shine" x="13" y="11" width="5" height="38" rx="2.5" fill="#fff" opacity=".4"/>` +
+      `<path d="M19.6 46.4L30.4 24.6M22.4 14.4h6.8l13 30q1.2 2.6 3.8 2.6h1.6" fill="none" stroke="#fff" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+    calendar: (g) => {
+      let cells = "";
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) {
+        const x = fix(15.4 + c * 9.2), y = fix(29 + r * 8.4), hot = r === 1 && c === 2;
+        cells += `<rect x="${x}" y="${y}" width="6.4" height="5.6" rx="1" fill="${hot ? g("orange") : "#e2dccb"}"${hot ? ' class="nx-blinkc"' : ""}/>`;
+      }
+      return `<ellipse class="sh" cx="32" cy="60.6" rx="23" ry="2.4"/><rect x="9" y="11" width="46" height="45" rx="5" fill="${g("paper")}" stroke="#d6ccb4" stroke-width="1"/>` +
+        `<path d="M9 16a5 5 0 0 1 5-5h36a5 5 0 0 1 5 5v7H9z" fill="${g("red")}"/><rect x="19" y="5" width="4.4" height="11" rx="2.2" fill="#5a616c"/><rect x="40.6" y="5" width="4.4" height="11" rx="2.2" fill="#5a616c"/>` + cells;
+    },
+    bucket: (g) => `<ellipse class="sh" cx="32" cy="60.6" rx="22" ry="2.4"/><path d="M9.6 17.4l5.6 37.4a4.4 3.6 0 0 0 4.3 3h25a4.4 3.6 0 0 0 4.3-3l5.6-37.4z" fill="${g("green")}"/>` +
+      `<path d="M13 30.6q19 5.4 38 0M14.8 43q17.2 5 34.4 0" fill="none" stroke="#137a40" stroke-width="1.6" opacity=".5"/>` +
+      `<g class="nx-drop"><rect x="25" y="3" width="14" height="10" rx="1.2" fill="${g("paper")}" stroke="#d6ccb4" stroke-width=".8"/><rect x="34" y="4.4" width="3" height="3.2" fill="#ef6a17"/></g>` +
+      `<ellipse cx="32" cy="17.4" rx="22.4" ry="6.2" fill="#8ae6ab"/><ellipse cx="32" cy="17.4" rx="18" ry="4.2" fill="#1b7f45"/>`,
+    gears: (g) => `<ellipse class="sh" cx="32" cy="60.6" rx="24" ry="2.4"/>` +
+      `<g class="nx-spin"><path d="${gearPath(25, 27, 11, 15.4, 9)}" fill="${g("teal")}"/><circle cx="25" cy="27" r="4.8" fill="#e9fbf8"/></g>` +
+      `<g class="nx-spin slow"><path d="${gearPath(45, 45, 7.4, 10.6, 7)}" fill="${g("orange")}"/><circle cx="45" cy="45" r="3.2" fill="#fff3e6"/></g>`,
+    delta: (g) => `<ellipse class="sh" cx="32" cy="60.4" rx="26" ry="2.4"/><path d="M32 5.4L59 55H5z" fill="${g("deep")}" stroke-linejoin="round"/>` +
+      `<path d="M32 19.4L48.6 49.6H15.4z" fill="${g("sky")}"/><path d="M22.6 42.6h18.8M26.4 35.6h11.2" stroke="#3a6fd8" stroke-width="2.2" stroke-linecap="round"/>` +
+      `<rect class="nx-shine" x="9" y="49" width="6" height="4" rx="2" fill="#fff" opacity=".45"/>`,
+    lock: (g) => `<ellipse class="sh" cx="32" cy="60.6" rx="20" ry="2.4"/><path d="M21 29v-7a11 11 0 0 1 22 0v7" fill="none" stroke="#8c96a3" stroke-width="5"/><rect x="14" y="28" width="36" height="28" rx="5" fill="${g("yellow")}"/>` +
       `<circle cx="32" cy="39.6" r="3.6" fill="#7a5a12"/><rect x="30.6" y="40.6" width="2.8" height="7.4" rx="1.4" fill="#7a5a12"/>`,
   };
   // The source badges of the answers to plan v2.2, drawn on a 12 × 12 grid in the current color.
@@ -329,72 +406,88 @@
     tall: { t: [12.5, 0.52, 14.6], a: [11.5, 0.43, 13.4], m: [9.5, 0.6, 11.6] },
   };
   const box = (s, x, y, w, h, o = {}) => ({ s, x, y, w, h, ...o });
+  // The plan's hybrid map (v4.0, section B): the product on AWS at the top, the 06:00 GitHub Actions run in the middle,
+  // and below it the three lanes: Kafka in GitHub Actions, S3 on AWS, then the rooms of Databricks Free Edition.
+  const ROOMS = ["kafka", "s3", "volume", "bronze", "silver", "gold", "stats"];
   const WIDE = (() => {
     const LY = { sim: 444, real: 508, public: 572 };
     const lane = (k) => box("card", 26, LY[k] - 29, 124, 58, { iz: 34, short: true });
-    const page = (k) => box("card", 936, LY[k] - 29, 160, 58, { iz: 34 });
+    const page = (k) => box("card", 1000, LY[k] - 29, 156, 58, { iz: 34 });
+    const tile = (x) => box("tile", x, 44, 128, 132, { iz: 48 });
+    const stage = (x) => box("stage", x, 314, 96, 290);
     const nodes = {
-      reader: box("card", 32, 62, 196, 96), mailbox: box("card", 268, 62, 196, 96), writer: box("card", 504, 62, 196, 96),
-      doctor: box("tile", 752, 50, 156, 124, { iz: 48 }), luck: box("tile", 928, 50, 156, 124, { iz: 48 }),
+      reader: box("card", 28, 38, 176, 64, { iz: 40, short: true }), writer: box("card", 28, 112, 176, 64, { iz: 40, short: true }),
+      cdn: tile(240), lambda: tile(388), dynamo: tile(536), sfn: tile(684),
+      doctor: box("tile", 906, 50, 120, 124, { iz: 48 }), luck: box("tile", 1034, 50, 120, 124, { iz: 48 }),
       daily: box("card", 24, 212, 252, 46, { iz: 36 }),
       votes: lane("real"), sim: lane("sim"), open: lane("public"),
-      kafka: box("stage", 170, 306, 94, 166), dock: box("stage", 278, 306, 94, 298),
-      bronze: box("stage", 400, 314, 108, 290), silver: box("stage", 520, 314, 108, 290), gold: box("stage", 640, 314, 108, 290), stats: box("stage", 760, 314, 108, 290),
-      pages: box("tile", 936, 300, 160, 104, { iz: 40 }), library: page("real"), store: page("sim"), lessons: page("public"),
+      kafka: box("stage", 176, 306, 88, 166), s3: box("stage", 292, 306, 88, 298),
+      volume: stage(410), bronze: stage(518), silver: stage(626), gold: stage(734), stats: stage(842),
+      pipeline: box("card", 408, 618, 178, 54, { iz: 32, short: true }), delta: box("card", 592, 618, 178, 54, { iz: 32 }), uc: box("card", 776, 618, 178, 54, { iz: 32 }),
+      pages: box("tile", 1000, 300, 156, 104, { iz: 40 }), library: page("real"), store: page("sim"), lessons: page("public"),
     };
-    const rooms = ["kafka", "dock", "bronze", "silver", "gold", "stats"];
     const cx = (id) => nodes[id].x + nodes[id].w / 2;
     const tag = (room, k, t) => ({ t, x: cx(room), y: LY[k] + 16, w: nodes[room].w - 8 });
     return {
-      w: 1120, h: 636, f: FONTS.wide, nodes,
+      w: 1180, h: 700, f: FONTS.wide, nodes,
       zones: [
-        box("z", 16, 16, 700, 172, { k: "live" }), box("z", 732, 16, 372, 172, { k: "browser" }), box("z", 16, 204, 1088, 62, { k: "daily" }),
-        box("z", 16, 284, 140, 336, { k: "sources" }), box("z", 390, 284, 488, 336, { k: "dbx", solid: true }), box("z", 928, 284, 176, 336, { k: "site" }),
+        box("z", 16, 16, 868, 172, { k: "live" }), box("z", 896, 16, 268, 172, { k: "browser" }), box("z", 16, 204, 1148, 62, { k: "daily" }),
+        box("z", 16, 284, 140, 398, { k: "sources" }), box("z", 168, 284, 104, 398, { k: "gha", short: true }), box("z", 284, 284, 104, 398, { k: "aws" }),
+        box("z", 400, 284, 560, 398, { k: "dbx", solid: true }), box("z", 990, 284, 174, 398, { k: "site" }),
       ],
       // Each kind of data runs on its own lane from its source to its page, through the rooms it uses: they never cross.
-      lanes: ["real", "sim", "public"].map((k) => ({ kind: k, pts: [[150, LY[k]], [934, LY[k]]], stops: rooms.filter((r) => r !== "kafka" || k === "sim").map((r) => [cx(r), LY[k]]) })),
-      json: ["real", "sim", "public"].map((k) => [898, LY[k]]),
+      lanes: ["real", "sim", "public"].map((k) => ({ kind: k, pts: [[150, LY[k]], [998, LY[k]]], stops: ROOMS.filter((r) => r !== "kafka" || k === "sim").map((r) => [cx(r), LY[k]]) })),
+      json: ["real", "sim", "public"].map((k) => [975, LY[k]]),
       links: [
-        { kind: "real", pts: [[228, 110], [266, 110]], live: true }, { kind: "real", pts: [[464, 110], [502, 110]], live: true },
-        { kind: "real", pts: [[300, 158], [300, 296], [21, 296], [21, LY.real], [24, LY.real]], k: "export" },
+        { kind: "real", pts: [[204, 70], [238, 70]], live: true }, { kind: "real", pts: [[204, 144], [238, 144]], live: true },
+        { kind: "real", pts: [[368, 110], [386, 110]], live: true }, { kind: "real", pts: [[516, 110], [534, 110]], live: true },
+        { kind: "real", pts: [[684, 110], [666, 110]] },
+        { kind: "real", pts: [[600, 176], [600, 193], [288, 193], [288, 290], [21, 290], [21, LY.real], [24, LY.real]], k: "export" },
       ],
       ctrl: [
-        { n: 1, pts: [[217, 266], [217, 304]] }, { n: 2, pts: [[40, 266], [40, LY.sim - 31]] },
-        { n: 3, pts: [[325, 266], [325, 304]] }, { n: 4, at: [300, 266] }, { n: 5, pts: [[860, 266], [860, 282]] },
-        { n: 6, pts: [[898, 266], [898, LY.sim - 18]] }, { n: 7, pts: [[1084, 266], [1084, 298]] },
+        { n: 1, pts: [[220, 266], [220, 304]] }, { n: 2, pts: [[40, 266], [40, LY.sim - 31]] }, { n: 3, pts: [[336, 266], [336, 304]] },
+        { n: 4, at: [288, 266] }, { n: 5, pts: [[458, 266], [458, 312]] }, { n: 6, pts: [[790, 266], [790, 282]] },
+        { n: 7, pts: [[975, 266], [975, LY.sim - 18]] }, { n: 8, pts: [[1140, 266], [1140, 298]] },
       ],
-      steps: { x: 318, y: 239, dir: "row" },
-      tags: TAGS.map(([room, k, t]) => tag(room, k, t)).concat(["real", "public"].map((k) => ({ t: L("Files API", "Files API"), x: 214, y: LY[k] + 16, w: 90 }))),
+      steps: { x: 306, y: 239, dir: "row" },
+      tags: TAGS.map(([room, k, t]) => tag(room, k, t)),
     };
   })();
   const TALL = (() => {
     const LX = { sim: 150, real: 230, public: 310 };
     const top = (k, y) => box("tile", LX[k] - 38, y, 76, 96, { iz: 34 });
-    const rooms = { kafka: 456, dock: 528, bronze: 620, silver: 692, gold: 764, stats: 836 };
+    const tile = (x, y) => box("tile", x, y, 96, 110, { iz: 34 });
+    const rooms = { kafka: 590, s3: 688, volume: 792, bronze: 864, silver: 936, gold: 1008, stats: 1080, pipeline: 1152, delta: 1224, uc: 1296 };
     const nodes = {
-      reader: box("tile", 16, 40, 96, 128), mailbox: box("tile", 132, 40, 96, 128), writer: box("tile", 248, 40, 96, 128),
-      daily: box("card", 16, 216, 156, 60, { iz: 36, short: true }),
-      votes: top("real", 342), sim: top("sim", 342), open: top("public", 342),
-      pages: box("tile", 16, 968, 88, 96, { iz: 34 }), library: top("real", 968), store: top("sim", 968), lessons: top("public", 968),
-      doctor: box("tile", 24, 1112, 150, 104, { iz: 44 }), luck: box("tile", 186, 1112, 150, 104, { iz: 44 }),
+      reader: tile(16, 36), cdn: tile(132, 36), lambda: tile(248, 36), writer: tile(16, 160), sfn: tile(132, 160), dynamo: tile(248, 160),
+      daily: box("card", 16, 316, 156, 60, { iz: 36, short: true }),
+      votes: top("real", 452), sim: top("sim", 452), open: top("public", 452),
+      pages: box("tile", 16, 1418, 88, 96, { iz: 34 }), library: top("real", 1418), store: top("sim", 1418), lessons: top("public", 1418),
+      doctor: box("tile", 24, 1562, 150, 104, { iz: 44 }), luck: box("tile", 186, 1562, 150, 104, { iz: 44 }),
     };
-    for (const [id, y] of Object.entries(rooms)) nodes[id] = box("row", id === "kafka" || id === "dock" ? 16 : 18, y, id === "kafka" ? 174 : id === "dock" ? 336 : 332, 64);
+    for (const [id, y] of Object.entries(rooms)) nodes[id] = box("row", id === "kafka" || id === "s3" ? 16 : 18, y, id === "kafka" ? 174 : id === "s3" ? 336 : 332, 64);
     const mid = (id) => rooms[id] + 32;
     return {
-      w: 360, h: 1240, f: FONTS.tall, nodes,
+      w: 360, h: 1690, f: FONTS.tall, nodes,
       zones: [
-        box("z", 8, 14, 344, 166, { k: "live" }), box("z", 8, 196, 344, 104, { k: "daily" }), box("z", 8, 324, 344, 126, { k: "sources" }),
-        box("z", 10, 606, 340, 306, { k: "dbx", solid: true, short: true }), box("z", 8, 950, 344, 126, { k: "site" }), box("z", 8, 1092, 344, 136, { k: "browser" }),
+        box("z", 8, 14, 344, 266, { k: "live" }), box("z", 8, 296, 344, 122, { k: "daily", short: true }), box("z", 8, 434, 344, 126, { k: "sources" }),
+        box("z", 8, 576, 190, 86, { k: "gha" }), box("z", 8, 674, 344, 86, { k: "aws" }),
+        box("z", 10, 776, 340, 596, { k: "dbx", solid: true, short: true }), box("z", 8, 1400, 344, 126, { k: "site", short: true }), box("z", 8, 1542, 344, 136, { k: "browser", short: true }),
       ],
-      lanes: ["real", "sim", "public"].map((k) => ({ kind: k, pts: [[LX[k], 438], [LX[k], 966]], stops: Object.keys(rooms).filter((r) => r !== "kafka" || k === "sim").map((r) => [LX[k], mid(r)]) })),
-      json: ["real", "sim", "public"].map((k) => [LX[k], 930]),
+      lanes: ["real", "sim", "public"].map((k) => ({ kind: k, pts: [[LX[k], 548], [LX[k], 1416]], stops: ROOMS.filter((r) => r !== "kafka" || k === "sim").map((r) => [LX[k], mid(r)]) })),
+      json: ["real", "sim", "public"].map((k) => [LX[k], 1386]),
       links: [
-        { kind: "real", pts: [[112, 96], [130, 96]], live: true }, { kind: "real", pts: [[228, 96], [246, 96]], live: true },
-        { kind: "real", pts: [[180, 168], [180, 312], [LX.real, 312], [LX.real, 340]], k: "export" },
+        { kind: "real", pts: [[112, 91], [130, 91]], live: true }, { kind: "real", pts: [[228, 91], [246, 91]], live: true },
+        { kind: "real", pts: [[112, 200], [122, 200], [122, 128], [130, 128]], live: true }, { kind: "real", pts: [[296, 146], [296, 158]], live: true },
+        { kind: "real", pts: [[228, 215], [246, 215]] },
+        { kind: "real", pts: [[288, 270], [288, 287], [186, 287], [186, 442], [LX.real, 442], [LX.real, 450]], k: "export" },
       ],
-      ctrl: [{ n: 1, at: [182, 466] }, { n: 2, at: [182, 350] }, { n: 3, at: [334, 538] }, { n: 4, at: [180, 300] }, { n: 5, at: [340, 606] }, { n: 6, at: [338, 930] }, { n: 7, at: [96, 976] }],
-      steps: { x: 202, y: 222, dir: "col" },
-      tags: [{ t: L("Files API", "Files API"), x: 270, y: 482, w: 36 }, { t: L("Files API", "Files API"), x: 334, y: 482, w: 36 }],
+      ctrl: [
+        { n: 1, at: [182, 600] }, { n: 2, at: [182, 460] }, { n: 3, at: [334, 698] }, { n: 4, at: [186, 296] },
+        { n: 5, at: [334, 802] }, { n: 6, at: [300, 776] }, { n: 7, at: [338, 1386] }, { n: 8, at: [96, 1426] },
+      ],
+      steps: { x: 202, y: 320, dir: "col" },
+      tags: [],
     };
   })();
   const LAYOUTS = { wide: WIDE, tall: TALL };
@@ -422,11 +515,11 @@
   function icon(name, x, y, size, g) {
     return `<g class="ico ico-${name}" transform="translate(${fix(x)} ${fix(y)}) scale(${Math.round((size / 64) * 1000) / 1000})">${ART[name](g)}</g>`;
   }
-  function lines(n, ctx, w, short) {
+  function lines(n, ctx, w, short, note = true) {
     const f = ctx.f, fit = (k) => Math.max(4, Math.floor(w / (f[k][0] * f[k][1]))), out = [];
     wrap(tr(short && n.ts ? n.ts : n.t, ctx.lang), fit("t")).forEach((s) => out.push(["t", s]));
     if (n.a) wrap(tr(n.a, ctx.lang), fit("a")).forEach((s) => out.push(["a", s]));
-    if (n.m) wrap(tr(n.m, ctx.lang), fit("m")).forEach((s) => out.push(["m", s]));
+    if (n.m && note) wrap(tr(n.m, ctx.lang), fit("m")).forEach((s) => out.push(["m", s]));
     return out;
   }
   const blockH = (ls, f) => ls.reduce((h, [k]) => h + f[k][2], 0);
@@ -460,7 +553,7 @@
       body = icon(n.icon, b.x + (b.w - iz) / 2, b.y + 8, iz, g) + text(ls, b.x + b.w / 2, b.y + 12 + iz, f, "middle");
     } else {
       // A room in the tall layout: the header sits in a gutter on the left, the lanes cross on the right.
-      const iz = 30, tx = b.x + 8 + iz + 6, ls = lines(n, ctx, 132 - tx - 2, true);
+      const iz = 30, tx = b.x + 8 + iz + 6, ls = lines(n, ctx, 132 - tx - 2, true, false);
       body = icon(n.icon, b.x + 8, b.y + (b.h - iz) / 2, iz, g) + text(ls, tx, b.y + (b.h - blockH(ls, f)) / 2, f);
     }
     return open + body + (b.s === "card" || b.s === "tile" ? badge(n.kind, b.x + 10, b.y + 10) : "") + "</g>";
@@ -655,7 +748,7 @@ ${["real", "public", "sim"].map((k) => [".lane", ".stop", ".pk", ".node"].map((e
 .nx .nx-bub { animation: nx-bub 2.2s ease-in infinite; }
 .nx .nx-bub.b2 { animation-delay: -0.8s; } .nx .nx-bub.b3 { animation-delay: -1.5s; }
 @keyframes nx-bub { 0% { transform: translateY(4px); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(-10px); opacity: 0; } }
-.nx .nx-slot { animation: nx-blink 3s ease-in-out infinite; }
+.nx .nx-slot, .nx .nx-blinkc { animation: nx-blink 3s ease-in-out infinite; }
 .nx .nx-slot.s1 { animation-delay: -0.75s; } .nx .nx-slot.s3 { animation-delay: -1.5s; } .nx .nx-slot.s5 { animation-delay: -2.25s; }
 @keyframes nx-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 .nx .nx-belt { animation: nx-belt 2.6s linear infinite; }

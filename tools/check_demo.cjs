@@ -22,6 +22,16 @@ const PHONE = { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, h
 const DESKTOP = { width: 1366, height: 900, deviceScaleFactor: 1 };
 // The example Ad Doctor report must always give the same verdicts (a regression check on the model).
 const DOCTOR = { stop: 8, keep: 2, luck: 6, wait: 8, save: 142 };
+// Plan v4.0 (section 0, step 3): the For nerds map is the hybrid of section B, and its stack table is §3.0's verdict table.
+const HYBRID = { daily: "GitHub Actions", kafka: "Kafka", s3: "S3", cdn: "CloudFront", lambda: "Lambda", dynamo: "DynamoDB", sfn: "Step Functions",
+  volume: "Auto Loader", pipeline: "Lakeflow", delta: "Delta", uc: "Unity Catalog" };
+const VERDICTS = [
+  ["Kafka", "Real, for the store only"], ["Amazon S3", "Real"], ["Databricks Free Edition + Lakeflow pipeline", "Real"], ["Auto Loader", "Real"],
+  ["Delta Lake", "Real"], ["PySpark (serverless)", "Real, bigger than needed"], ["Pipeline expectations", "Real"], ["Unity Catalog", "Real"],
+  ["Notebooks (Job tasks)", "Real"], ["GitHub Actions + OIDC", "Real"], ["AWS Lambda", "Real"], ["DynamoDB", "Real"], ["AWS Step Functions", "Real"],
+  ["CloudFront + S3 site", "Real"], ["AWS CDK + Databricks Bundles", "Real"], ["JSON contracts", "Real"], ["ebook_ab.stats + scipy", "Real"],
+  ["React + TypeScript", "Real"], ["AWS Glue jobs + Spark UI", "Lab (on credits)"], ["Delta maintenance demos", "Lab (time travel and CDF themselves are real)"],
+];
 
 async function open(browser, mode, viewport, query, hash = "", scheme = "light") {
   const tab = await browser.newPage();
@@ -296,7 +306,19 @@ async function duelTo(tab, scenario) {
     check((await nd.$eval("#ndmap", (m) => m.dataset.layout)) === "wide", "a 1366 px screen does not get the wide map");
     const ids = await nd.evaluate(() => Object.keys(window.__ls.nerds.NODES));
     const drawn = await nd.$$eval("#ndmap .node", (g) => g.map((x) => x.dataset.node));
-    check(ids.length === 19 && ids.every((id) => drawn.includes(id)), `the map draws ${drawn.length} of ${ids.length} boxes`);
+    check(ids.length === drawn.length && ids.every((id) => drawn.includes(id)), `the map draws ${drawn.length} of ${ids.length} boxes`);
+    // The hybrid map: every piece the plan names has its own box, in the zone of its platform.
+    const titles = await nd.evaluate(() => Object.fromEntries(Object.entries(window.__ls.nerds.NODES).map(([k, v]) => [k, v.t.en])));
+    for (const [id, word] of Object.entries(HYBRID)) check((titles[id] || "").includes(word), `the map has no ${word} box (${id}: ${titles[id]})`);
+    const zones = await nd.$$eval("#ndmap .zlabel .zl", (z) => z.map((x) => x.textContent).join(" | "));
+    for (const z of ["AWS", "GITHUB", "DATABRICKS FREE EDITION"]) check(zones.includes(z), `no ${z} zone on the map: ${zones}`);
+    const old = await nd.evaluate(() => (document.querySelector(".nerds").innerText.match(/Cloudflare|D1|GitHub Pages|Aiven|Worker/g) || []).join(", "));
+    check(!old, `the For nerds tab still names v3.0 pieces: ${old}`);
+    // The stack table is §3.0's verdict table, row for row, and every box's card has a "Why" line.
+    const rows = await nd.$$eval('[data-act="ntool"]', (r) => r.map((x) => [x.querySelector(".tech").textContent, x.querySelector(".vd").textContent]));
+    check(JSON.stringify(rows) === JSON.stringify(VERDICTS), `the stack table is not §3.0's verdicts: ${JSON.stringify(rows)}`);
+    const noWhy = await nd.evaluate(() => Object.entries(window.__ls.nerds.DETAILS).filter(([, d]) => !d.why || d.why.en.length < 40 || d.why.es.length < 40).map(([k]) => k));
+    check(!noWhy.length, `cards without a "Why" line: ${noWhy.join(", ")}`);
     check((await nd.$$eval("#ndmap .pk animateMotion", (a) => a.length)) >= 8, "no packets travel the lanes");
     let over = await overflow(nd);
     check(!over.length, `labels overflow their boxes: ${over.join("; ")}`);
@@ -307,6 +329,8 @@ async function duelTo(tab, scenario) {
       await press(nd, `#ndmap .node[data-node="${id}"]`);
       const shown = await text(nd, "#ndtitle");
       check(shown === (await nd.evaluate((k) => window.__ls.nerds.NODES[k].t.en, id)), `the ${id} box opened the card "${shown}"`);
+      const why = await nd.$eval("#nddetail dl", (d) => [...d.querySelectorAll("dt")].map((x) => x.textContent).join("|"));
+      check(why.includes("Why it was necessary"), `the ${id} card has no "Why it was necessary" line`);
     }
     // The vote story walks twelve steps from the reader to the library; nothing simulated ever reaches the library.
     await click(nd, '[data-act="nstory"][data-story="vote"]');
@@ -342,7 +366,8 @@ async function duelTo(tab, scenario) {
     if (review) await (await np.$("#ndart")).screenshot({ path: path.join(review, "nerds-phone-map.png") });
     check(!(await np.evaluate(() => /\bnd\.[a-z]/.test(document.body.innerText))), "the For nerds tab shows a raw text key");
     await click(np, '[data-act="nstory"][data-story="shopper"]');
-    check((await text(np, "#ndcap .k")).includes("Paso 1 de 8"), "the Spanish story caption is wrong");
+    const shopper = await np.evaluate(() => window.__ls.nerds.STORIES.find((s) => s.k === "shopper").steps.length);
+    check((await text(np, "#ndcap .k")).includes(`Paso 1 de ${shopper}`), "the Spanish story caption is wrong");
     await look(np, "nerds-phone-es.png", true);
     await np.close();
     // With reduced motion the map stands still: no packets, no walking dashes.
