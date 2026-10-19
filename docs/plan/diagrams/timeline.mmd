@@ -1,0 +1,18 @@
+gantt
+  title Phases at ~20 h/week (example start Mon 2026-10-19; dates shift with your start and the STOP points)
+  dateFormat YYYY-MM-DD
+  axisFormat %d %b
+  section Lifesaver first
+  0 Feasibility                  :p0, 2026-10-19, 4d
+  1 Lifesaver launch             :p1, after p0, 15d
+  section Platform
+  2 Simulator + catalog          :p2, after p1, 6d
+  3 Kafka groups + Bronze        :p3, after p2, 4d
+  4 Silver                       :p4, after p3, 6d
+  5 Gold (20 views)              :p5, after p4, 4d
+  6 Analysis + real data         :p6, after p5, 8d
+  section Product and operations
+  7 More tools and pages         :p7, after p6, 21d
+  8 Orchestration, CI, daily run :p8, after p7, 7d
+  9 Lab (job cluster, Spark UI) :p9, after p8, 4d
+  10 Docs + report               :p10, after p9, 3d

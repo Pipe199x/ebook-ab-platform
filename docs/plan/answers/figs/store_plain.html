@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup: Behind the scenes, our test store</title>
+<link rel="stylesheet" href="../../old/mockups-v2.3/mockup.css">
+<link rel="stylesheet" href="answers-figs.css">
+<style>
+  main { flex-direction: column; gap: 7px; }
+  .head { display: flex; align-items: center; gap: 9px; }
+  .head h1 { margin: 0; }
+  .sub { margin: 0; }
+  .banner.sim { background: #efefec; border-bottom-color: #dddcd6; color: #3f3f3c; }
+  .row { display: grid; grid-template-columns: 150px 1fr 104px; gap: 12px; align-items: center; padding: 7px 11px; }
+  .row .name { font-weight: 600; font-size: 12.5px; }
+  .row .what { font-size: 10.5px; color: var(--ink-2); margin-top: 1px; }
+  .row p { margin: 0; font-size: 12px; line-height: 1.4; }
+  .row .chip { justify-self: start; }
+  .foot { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--ink-2); }
+  .foot .asof { margin-left: auto; }
+  .note2 { font-size: 11px; color: var(--ink-2); }
+</style>
+</head>
+<body data-render="720x450@3">
+<div class="window">
+  <div class="chrome"><i></i><i></i><i></i><div class="url">pipe199x.github.io/ebook-ab-platform/#/test-store</div><div class="ribbon">MOCKUP · illustrative numbers</div></div>
+  <div class="site"><b>Before You Decide</b><span>What worked</span><span>Plan a test</span><span>Your results</span><span>Real lessons</span><span class="on">Test store</span><span class="lang">ES · <strong>EN</strong></span></div>
+  <div class="banner sim">Simulated · a fictional store we built to show how big stores run A/B tests · not advice for your book</div>
+  <main>
+    <div class="head"><h1>Behind the scenes: our test store</h1><span data-src="sim"></span></div>
+    <p class="sub">70,000 simulated shoppers buy real public-domain books. We ran three tests on the store's own pages. Each test has its own decision, with rules written before it started.</p>
+    <div class="card row">
+      <div><div class="name">Wallet-first checkout</div><div class="what">Checkout page · the saved wallet shown first</div></div>
+      <p>4.9% more shoppers paid within 30 minutes, and every safety limit held.</p>
+      <span class="chip good"><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="var(--good)"/><path d="M3.3 6.2l1.8 1.8 3.6-3.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Keep it</span>
+    </div>
+    <div class="card row">
+      <div><div class="name">New cover + subtitle</div><div class="what">Book page · one classic's new look</div></div>
+      <p>17.5% more shoppers bought it, but refunds rose 1.1 points. The limit set before the test was 0.25.</p>
+      <span class="chip bad"><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="var(--critical)"/><path d="M4 4l4 4M8 4l-4 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>Don't keep it</span>
+    </div>
+    <div class="card row">
+      <div><div class="name">3-book bundle banner</div><div class="what">Book page · "pick any 3, save 25%"</div></div>
+      <p>Money per visitor rose 17.1%, and every safety limit held.</p>
+      <span class="chip good"><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="var(--good)"/><path d="M3.3 6.2l1.8 1.8 3.6-3.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Keep it</span>
+    </div>
+    <div class="foot">
+      <span>Checks on the checks:</span>
+      <span class="chip good"><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="var(--good)"/><path d="M3.3 6.2l1.8 1.8 3.6-3.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Same page for both groups: no false alarm</span>
+      <span class="chip warn"><svg viewBox="0 0 12 12"><path d="M6 .8l5.4 9.6H.6z" fill="var(--warning)"/><path d="M6 4.2v3" stroke="#3b2c00" stroke-width="1.4" stroke-linecap="round"/><circle cx="6" cy="8.9" r=".75" fill="#3b2c00"/></svg>Broken split: caught</span>
+      <span class="asof">data as of 2026-10-15</span>
+    </div>
+    <div class="note2">What this shows: how a store decides with rules set in advance. It says nothing about your book; for that, see "What worked".</div>
+  </main>
+</div>
+<script src="answers-figs.js"></script>
+<script>AnswersFigs.decorate();</script>
+</body>
+</html>

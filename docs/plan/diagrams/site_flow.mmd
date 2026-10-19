@@ -1,0 +1,7 @@
+flowchart TB
+  GOLD[("Gold views + library<br/>(Databricks)")] -->|"SQL; token lives in CI secrets"| EXP["GitHub Actions<br/>export + JSON Schema check"]
+  EXP -->|"small JSON files"| PAGES["GitHub Pages<br/>static site"]
+  PAGES --> BROWSER["Visitor's browser<br/>Ad Doctor, Real or luck? and charts run here<br/>no cookies, no analytics"]
+  BROWSER -->|"a writer's Duel; readers' votes;<br/>opt-in results only"| EDGE[("Duel service<br/>Cloudflare Worker + D1")]
+  EDGE -->|"progress counts, never the winner early"| BROWSER
+  EDGE -->|"daily export as files (D30)"| GOLD

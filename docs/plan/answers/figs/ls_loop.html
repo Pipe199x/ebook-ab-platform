@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Figure: the loop that reaches many writers</title>
+<link rel="stylesheet" href="ls-figs.css">
+<style>
+  svg { display: block; }
+  .node rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .node.hot rect { stroke: var(--accent); stroke-width: 2.5; }
+  .node text { font-family: var(--body); font-size: 15px; fill: var(--ink); }
+  .node text.b { font-weight: 700; }
+  .ring { fill: none; stroke: #b9c1d6; stroke-width: 3; }
+  .center1 { font-family: var(--display); font-size: 26px; font-weight: 700; fill: var(--ink); }
+  .center2 { font-family: var(--body); font-size: 15px; fill: var(--ink-2); }
+  .arrowhead { fill: #8c96b3; }
+</style>
+</head>
+<body data-render="1000x560@2">
+<svg viewBox="0 0 1000 560" width="1000" height="560" role="img" aria-label="The loop">
+  <circle class="ring" cx="500" cy="280" r="205"/>
+  <g id="arrows"></g>
+  <g id="nodes"></g>
+  <text class="center1" x="500" y="272" text-anchor="middle">Every Duel helps</text>
+  <text class="center1" x="500" y="304" text-anchor="middle">the next writer</text>
+</svg>
+<script>
+(() => {
+  const nodes = [
+    ["A writer must choose", "a cover, a title, a blurb", true],
+    ["A free Duel", "one link, 30 seconds"],
+    ["Readers vote", "one random version each"],
+    ["“Test yours free”", "some voters are writers"],
+    ["The result joins the library", "anonymous, with the writer's OK"],
+    ["Writers who can't test", "still get an answer"],
+  ];
+  const cx = 500, cy = 280, R = 205, W = 236, H = 58;
+  const pos = (i) => { const a = (-90 + i * 60) * Math.PI / 180; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; };
+  let g = "";
+  nodes.forEach(([b, s, hot], i) => {
+    const [x, y] = pos(i);
+    g += `<g class="node${hot ? " hot" : ""}"><rect x="${x - W / 2}" y="${y - H / 2}" width="${W}" height="${H}" rx="12"/>` +
+      `<text class="b" x="${x}" y="${y - 4}" text-anchor="middle">${b}</text><text x="${x}" y="${y + 17}" text-anchor="middle" fill="#454b5e">${s}</text></g>`;
+  });
+  document.getElementById("nodes").innerHTML = g;
+  // An arrowhead halfway between each pair of nodes, pointing clockwise.
+  let a = "";
+  for (let i = 0; i < 6; i++) {
+    const ang = (-90 + i * 60 + 30) * Math.PI / 180;
+    const x = cx + R * Math.cos(ang), y = cy + R * Math.sin(ang);
+    const rot = (-90 + i * 60 + 30) + 90;
+    a += `<path class="arrowhead" d="M -9 -8 L 9 0 L -9 8 Z" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot})"/>`;
+  }
+  document.getElementById("arrows").innerHTML = a;
+})();
+</script>
+</body>
+</html>

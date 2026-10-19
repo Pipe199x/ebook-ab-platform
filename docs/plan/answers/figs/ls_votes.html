@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Figure: readers a Duel needs</title>
+<link rel="stylesheet" href="ls-figs.css">
+<style>
+  .wrap { padding: 20px 26px; display: grid; gap: 12px; }
+  h1 { margin: 0; font-family: var(--display); font-size: 22px; }
+  .rows { display: grid; grid-template-columns: 330px minmax(0, 1fr); row-gap: 12px; column-gap: 16px; align-items: center; }
+  .lab b { display: block; font-size: 16px; }
+  .lab span { font-size: 13.5px; color: var(--ink-2); }
+  .track { position: relative; height: 30px; }
+  .track i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 6px 6px 0; background: var(--accent); }
+  .track i.tiny { background: #b9c1d6; }
+  .track span { position: absolute; top: 4px; font-weight: 700; font-size: 16px; white-space: nowrap; }
+  .note { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body data-render="1000x380@2">
+<div class="wrap">
+  <h1>How many readers a Duel needs</h1>
+  <div class="rows" id="rows"></div>
+  <p class="note" id="note"></p>
+</div>
+<script src="../../render/abstats.js"></script>
+<script>
+(() => {
+  // Total readers (both versions) to see the difference at 95% confidence and 80% power, half the readers per version.
+  const base = 0.3;
+  const rows = [
+    ["Big difference", 0.5, ""], ["Clear difference", 0.45, ""], ["Small difference", 0.4, ""], ["Tiny difference", 0.35, " · the tool says “too close”"],
+  ].map(([name, p2, extra]) => ({ name, p2, extra, n: 2 * Math.ceil(ABStats.nPerArm(base, p2 / base - 1)) }));
+  const max = Math.max(...rows.map((r) => r.n));
+  const fmt = (n) => n.toLocaleString("en-US");
+  document.getElementById("rows").innerHTML = rows.map((r, i) => {
+    const w = Math.max(1.2, (r.n / max) * 80);
+    const inside = w > 40;
+    return `<div class="lab"><b>${r.name}</b><span>${Math.round(base * 100)}% → ${Math.round(r.p2 * 100)}% want to read it${r.extra}</span></div>` +
+      `<div class="track"><i class="${i === 3 ? "tiny" : ""}" style="width:${w}%"></i><span class="num" style="${inside ? `left:12px;color:#131726` : `left:calc(${w}% + 10px)`}">${fmt(r.n)} readers</span></div>`;
+  }).join("");
+  document.getElementById("note").textContent = "Two-sided 95% test, 80% power, half the readers see each version; the same formula as the rest of the plan (abstats.js). The prototype's Duel opens at 330 readers: the clear difference, rounded up.";
+})();
+</script>
+</body>
+</html>

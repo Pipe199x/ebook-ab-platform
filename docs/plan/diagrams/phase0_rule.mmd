@@ -1,0 +1,11 @@
+flowchart LR
+  S["Phase 0 probes<br/>(serverless notebook)"] --> T1{"T1-T3<br/>network ok?"}
+  T1 -- yes --> T4{"T4<br/>Kafka read ok?"}
+  T4 -- yes --> T5{"T5<br/>pipeline read ok?"}
+  T5 -- yes --> A["PATH A<br/>direct Kafka source<br/>(B still built)"]
+  T1 -- no --> V{"LinkedIn<br/>verified?"}
+  T4 -- no --> V
+  T5 -- no --> V
+  V -- no --> STOP["STOP: you verify<br/>via LinkedIn,<br/>I re-run T1-T5"]
+  STOP -.-> T1
+  V -- yes --> B["PATH B<br/>lakehouse-bridge<br/>+ Auto Loader"]

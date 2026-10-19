@@ -1,0 +1,26 @@
+/* Extra pieces for the answers mockups and the answers PDF: source badges, the "x of 5" meter, "?" help. */
+.src {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 1px 7px 1px 5px;
+  border-radius: 9px;
+  font-size: 10px; font-weight: 600;
+  white-space: nowrap;
+}
+.src svg { width: 11px; height: 11px; flex: none; }
+.src.shared { background: #e4edf7; color: #1f4e79; }
+.src.public { background: #ece6f5; color: #4a2f7a; }
+.src.sim { background: #ebebe8; color: #3f3f3c; }
+
+.meter { display: inline-flex; gap: 3px; vertical-align: middle; }
+.meter i { width: 9px; height: 9px; border-radius: 50%; border: 1.4px solid #9a988f; background: #fff; display: block; }
+.meter i.on { border-color: var(--accent, #1f4e79); background: var(--accent, #1f4e79); }
+
+.q {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 13px; height: 13px; margin-left: 4px;
+  border-radius: 50%;
+  background: #e4edf7; color: #1f4e79;
+  font-size: 9.5px; font-weight: 700; line-height: 1;
+  vertical-align: 1px;
+}
+.q.open { background: #1f4e79; color: #fff; }

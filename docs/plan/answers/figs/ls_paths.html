@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Figure: homework path vs lifesaver path</title>
+<link rel="stylesheet" href="ls-figs.css">
+<style>
+  .wrap { display: grid; gap: 18px; padding: 22px 26px; }
+  .lane { border-radius: 14px; padding: 16px 18px 14px; display: grid; gap: 12px; border: 1.5px solid var(--line); background: var(--surface); }
+  .lane.today { border-color: #e7b9b3; background: #fdf4f2; }
+  .lane.life { border-color: #9fd3b6; background: #f1faf4; }
+  .lab { display: flex; align-items: baseline; gap: 10px; }
+  .lab b { font-family: var(--display); font-size: 24px; }
+  .lab span { font-size: 15px; color: var(--ink-2); font-weight: 600; }
+  .today .lab b { color: var(--bad); }
+  .life .lab b { color: var(--good); }
+  .steps { display: flex; align-items: stretch; gap: 0; }
+  .st { flex: 1; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); padding: 10px 11px; font-size: 15px; font-weight: 700; line-height: 1.25; display: grid; align-content: center; }
+  .st small { display: block; font-weight: 400; font-size: 13px; color: var(--ink-2); margin-top: 3px; }
+  .st.end { border-width: 2px; }
+  .today .st.end { border-color: var(--bad); }
+  .life .st.end { border-color: var(--good); }
+  .arrow { width: 26px; flex: none; display: grid; place-items: center; color: var(--muted); font-size: 20px; font-weight: 700; }
+  .foot { font-size: 14px; font-weight: 700; }
+  .today .foot { color: var(--bad); }
+  .life .foot { color: var(--good); }
+</style>
+</head>
+<body data-render="1000x420@2">
+<div class="wrap">
+  <div class="lane today">
+    <div class="lab"><b>Today</b><span>Homework first</span></div>
+    <div class="steps">
+      <div class="st">Pay for two ads</div><div class="arrow">→</div>
+      <div class="st">Set up a split test</div><div class="arrow">→</div>
+      <div class="st">Wait 7 days</div><div class="arrow">→</div>
+      <div class="st">Type the numbers in</div><div class="arrow">→</div>
+      <div class="st end">“Use B”<small>Meta already said so</small></div>
+    </div>
+    <div class="foot">Money first · a week · only for writers who already run ads</div>
+  </div>
+  <div class="lane life">
+    <div class="lab"><b>Lifesaver</b><span>Answer first</span></div>
+    <div class="steps">
+      <div class="st">Upload two covers<small>30 seconds, no account</small></div><div class="arrow">→</div>
+      <div class="st">Share one link<small>Instagram, WhatsApp, Wattpad…</small></div><div class="arrow">→</div>
+      <div class="st">Readers vote<small>each one sees one version</small></div><div class="arrow">→</div>
+      <div class="st end">The reveal<small>+ a ready post for your launch</small></div>
+    </div>
+    <div class="foot">Free · no ad money · every writer, every book</div>
+  </div>
+</div>
+</body>
+</html>

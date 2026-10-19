@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Small seller: months of traffic needed</title>
+<style>
+  :root {
+    --surface: #ffffff;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --series-1: #2a78d6;
+  }
+  html, body { margin: 0; background: var(--surface); }
+  body { font-family: "Noto Sans", "DejaVu Sans", system-ui, sans-serif; color: var(--ink); }
+  .wrap { padding: 18px 26px 10px 18px; }
+  h1 { font-size: 19px; font-weight: 600; margin: 0 0 4px; }
+  p { font-size: 14px; color: var(--ink-2); margin: 0; }
+  svg { display: block; margin-top: 10px; }
+  svg text { font-family: inherit; }
+  .num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body data-render="900x400@3">
+<div class="wrap">
+  <h1>Small tweaks need years of traffic</h1>
+  <p>A shop with 2,000 visitors a month, 2% of whom buy. Split 50/50, 95% confidence, 80% power.</p>
+  <svg id="chart" width="856" height="300" role="img" aria-labelledby="chart-title">
+    <title id="chart-title">Months of traffic needed to detect each lift</title>
+  </svg>
+</div>
+<script src="../render/abstats.js"></script>
+<script>
+  const visitors = 2000, baseline = 0.02;
+  const rows = [0.1, 0.2, 0.3, 0.5, 1.0].map((lift) => ({ lift, months: ABStats.monthsNeeded(visitors, baseline, lift) }));
+  const svg = document.getElementById("chart");
+  const NS = "http://www.w3.org/2000/svg";
+  const W = 856, H = 300, left = 118, right = 214, padTop = 8, axisBand = 40, maxMonths = 84;
+  const plotW = W - left - right, rowH = (H - padTop - axisBand) / rows.length, barH = 24;
+  const x = (m) => left + (m / maxMonths) * plotW;
+  const el = (name, attrs, text) => {
+    const node = document.createElementNS(NS, name);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    if (text !== undefined) node.textContent = text;
+    svg.appendChild(node);
+    return node;
+  };
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const fmt = (v) => v.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+  // Gridlines every year, labelled in years.
+  for (let m = 0; m <= maxMonths; m += 12) {
+    el("line", { x1: x(m), x2: x(m), y1: padTop, y2: H - axisBand, stroke: m === 0 ? css("--axis") : css("--grid"), "stroke-width": 1 });
+    const label = m === 0 ? "0" : `${m / 12} ${m === 12 ? "year" : "years"}`;
+    el("text", { x: x(m), y: H - axisBand + 20, "text-anchor": "middle", "font-size": 13, fill: css("--muted"), class: "num" }, label);
+  }
+  el("text", { x: left + plotW / 2, y: H - 2, "text-anchor": "middle", "font-size": 13, fill: css("--ink-2") }, "Time needed to reach the required number of visitors");
+
+  rows.forEach((r, i) => {
+    const cy = padTop + rowH * i + rowH / 2;
+    el("text", { x: left - 14, y: cy, "text-anchor": "end", "dominant-baseline": "middle", "font-size": 15, fill: css("--ink") },
+      `+${Math.round(r.lift * 100)}% lift`);
+    // Bar: square at the baseline, 4px rounded data end.
+    const x0 = x(0), x1 = x(r.months), y0 = cy - barH / 2, rad = Math.min(4, (x1 - x0) / 2);
+    el("path", {
+      d: `M${x0},${y0} H${x1 - rad} Q${x1},${y0} ${x1},${y0 + rad} V${y0 + barH - rad} Q${x1},${y0 + barH} ${x1 - rad},${y0 + barH} H${x0} Z`,
+      fill: css("--series-1"),
+    });
+    const years = r.months / 12;
+    const label = years >= 1 ? `${fmt(r.months)} months (${fmt(years)} years)` : `${fmt(r.months)} months`;
+    el("text", { x: x1 + 8, y: cy, "dominant-baseline": "middle", "font-size": 14, "font-weight": 600, fill: css("--ink"), class: "num" }, label);
+  });
+</script>
+</body>
+</html>

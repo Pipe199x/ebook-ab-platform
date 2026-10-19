@@ -1,0 +1,23 @@
+flowchart TB
+  subgraph PEOPLE["Real writers and readers"]
+    direction LR
+    DUEL["Duel<br/>two covers, real readers"]
+    DOC["Ad Doctor<br/>runs in the browser"]
+    LUCK["Real or luck?<br/>runs in the browser"]
+  end
+  EDGE[("Free Cloudflare Worker + D1<br/>votes as counts, opt-in results")]
+  subgraph SIM["Simulated marketplace"]
+    direction LR
+    CAT["Real book catalog<br/>Project Gutenberg (CC0)"] --> SHOP["70,000 simulated shoppers<br/>browse, buy, refund"]
+  end
+  K[["Kafka<br/>the store's events"]]
+  REAL["4,873 real headline A/B tests<br/>(Upworthy, CC BY 4.0)"]
+  subgraph DBX["Databricks Free Edition"]
+    direction LR
+    LAKE["Lakehouse<br/>Bronze → Silver → Gold"] --> STATS["Statistics<br/>real or luck, decisions, library"]
+  end
+  SITE(["Public website<br/>library, lessons, test store, For nerds"])
+  DUEL --> EDGE -->|"one file a day"| DBX
+  SIM --> K --> DBX
+  REAL --> DBX
+  DBX --> SITE

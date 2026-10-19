@@ -1,0 +1,24 @@
+# Local scratch
+.tmpstat/
+tmp/
+debug.log
+*.log
+
+# Tool caches
+.codegraph/
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+node_modules/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db

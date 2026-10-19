@@ -1,0 +1,9 @@
+flowchart TB
+  S1["1 · A simulated shopper in Medellín<br/>opens a book page<br/>event: product_viewed"]
+  S2["2 · The event goes to Kafka<br/>topic market.storefront.v1, kept in order"]
+  S3["3 · The bridge lands a batch<br/>as a file in Databricks<br/>no duplicates, no gaps"]
+  S4["4 · Bronze keeps it raw · Silver checks it,<br/>removes duplicates, hides personal data"]
+  S5["5 · Gold summarizes it<br/>how many shoppers in each variant bought?"]
+  S6["6 · The analysis applies rules<br/>written before the test<br/>→ ship / don't ship"]
+  S7["7 · The website shows the decision<br/>refreshed every day"]
+  S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7

@@ -1,0 +1,19 @@
+sequenceDiagram
+  participant K as Kafka partition
+  participant B as lakehouse-bridge
+  participant V as UC volume (Files API)
+  participant A as Auto Loader to Bronze
+  B->>V: on_assign: list partition dir, max lastOffset L
+  B->>K: seek(max(committed, L+1))
+  loop every flush (5000 records or 60 s)
+    B->>K: poll records f..l
+    B->>B: deterministic JSONL, gzip mtime=0
+    B->>V: upload f-l.jsonl.gz (overwrite=False)
+    alt file already exists
+      B->>V: download and compare SHA-256
+      Note over B,V: same bytes: a retry, continue<br/>different bytes: offsets were reset,<br/>stop with EpochConflict
+    end
+    B->>K: commit l+1 (synchronous)
+  end
+  A->>V: discover new paths (each processed once)
+  A->>A: append rows to bronze.topic_raw

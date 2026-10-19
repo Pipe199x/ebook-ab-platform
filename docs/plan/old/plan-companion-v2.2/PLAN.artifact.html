@@ -1,0 +1,907 @@
+<title>ebook-ab-platform plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Interactive companion to plan v2.0: architecture, test-length calculator, one purchase step by step, timeline and costs.">
+<style>
+/* Layout: one reading column (max 1120px). Each section = heading + one-line purpose + one interactive figure. */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #eef2f7;
+  --ink: #13243a;
+  --ink-2: #47586b;
+  --muted: #6e7f93;
+  --line: #d9e0e8;
+  --accent: #1f4e79;
+  --accent-ink: #ffffff;
+  --accent-soft: #e4edf7;
+  --data: #2a78d6;
+  --data-soft: #d6e6fa;
+  --good: #0ca30c;
+  --good-ink: #0b6b0b;
+  --good-bg: #e5f3e5;
+  --warn: #fab219;
+  --warn-ink: #7a5300;
+  --warn-bg: #fff2d4;
+  --bad: #d03b3b;
+  --bad-ink: #a12b2b;
+  --bad-bg: #fbe7e7;
+  --code-bg: #f0f3f7;
+  --font-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Noto Sans", Roboto, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, "Noto Sans", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, "DejaVu Sans Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1520; --surface: #152031; --surface-2: #1b283a; --ink: #e6edf5; --ink-2: #b3c1d0; --muted: #8696a9;
+    --line: #2a394b; --accent: #8db8e6; --accent-ink: #0e1520; --accent-soft: #1b2d44; --data: #3987e5; --data-soft: #1c3352;
+    --good-ink: #86d886; --good-bg: #14301a; --warn-ink: #f3c763; --warn-bg: #362b10; --bad-ink: #f19393; --bad-bg: #3a1b1d;
+    --code-bg: #111a27; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1520; --surface: #152031; --surface-2: #1b283a; --ink: #e6edf5; --ink-2: #b3c1d0; --muted: #8696a9;
+  --line: #2a394b; --accent: #8db8e6; --accent-ink: #0e1520; --accent-soft: #1b2d44; --data: #3987e5; --data-soft: #1c3352;
+  --good-ink: #86d886; --good-bg: #14301a; --warn-ink: #f3c763; --warn-bg: #362b10; --bad-ink: #f19393; --bad-bg: #3a1b1d;
+  --code-bg: #111a27; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.55 var(--font-ui);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+a { color: var(--accent); }
+.page { max-width: 1120px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h2 { font-size: clamp(1.35rem, 2.4vw, 1.7rem); font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 650; }
+p { margin: 0; }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--data); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+/* Header */
+header.top { padding-block: 40px 22px; display: grid; gap: 14px; }
+header.top h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 750; color: var(--accent); letter-spacing: -0.01em; }
+header.top .lead { font-size: clamp(1.05rem, 2vw, 1.25rem); max-width: 60ch; }
+.status { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 11px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; background: var(--surface); border: 1px solid var(--line); }
+.pill.warn { background: var(--warn-bg); border-color: transparent; color: var(--warn-ink); }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+nav.toc a { text-decoration: none; color: var(--ink-2); }
+nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+
+section { padding-block: 44px 8px; display: grid; gap: 18px; }
+section > .intro { display: grid; gap: 6px; max-width: 70ch; }
+section > .intro p { color: var(--ink-2); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+
+/* What you'll have */
+.outcomes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px; }
+.outcome { padding: 16px 18px; display: grid; gap: 6px; align-content: start; }
+.outcome .tag { font-size: 0.78rem; color: var(--muted); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.outcome p { color: var(--ink-2); font-size: 0.95rem; }
+
+/* Architecture */
+.arch { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.lanes { display: grid; gap: 10px; }
+.lane { padding: 12px; display: grid; gap: 10px; }
+.lane-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.lane-head .eyebrow { color: var(--accent); }
+.lane-head span:last-child { color: var(--muted); font-size: 0.85rem; }
+.boxes { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.arrow { color: var(--muted); font-size: 1.1rem; line-height: 1; }
+.box {
+  border: 1px solid var(--line); background: var(--surface-2); border-radius: 9px;
+  padding: 8px 12px; text-align: left; cursor: pointer; display: grid; gap: 1px; min-width: 0;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.box b { font-weight: 650; font-size: 0.95rem; }
+.box small { color: var(--muted); font-size: 0.8rem; }
+.box:hover { border-color: var(--accent); }
+.box[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.box[aria-pressed="true"] small { color: var(--accent-ink); opacity: 0.85; }
+.down { text-align: center; color: var(--muted); font-size: 0.85rem; line-height: 1; }
+.detail { padding: 18px 20px; display: grid; gap: 12px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.detail .where { color: var(--muted); font-size: 0.88rem; }
+.detail dl { display: grid; gap: 10px; margin: 0; }
+.detail dt { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+.detail dd { margin: 2px 0 0; }
+.detail ul { margin: 0; padding-left: 1.1em; display: grid; gap: 3px; color: var(--ink-2); font-size: 0.95rem; }
+.facts-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Traffic tool */
+.tool { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.inputs { padding: 18px; display: grid; gap: 16px; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.preset { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 4px 11px; font-size: 0.85rem; cursor: pointer; }
+.preset[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 0.9rem; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; }
+.field output { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--data); }
+.results { padding: 18px 20px; display: grid; gap: 16px; }
+.chart { display: grid; gap: 4px; }
+.chart-row { display: grid; grid-template-columns: 74px minmax(0, 1fr) 128px; align-items: center; gap: 10px; min-height: 40px; border-radius: 8px; padding-inline: 4px; }
+.chart-row:hover, .chart-row:focus-visible { background: var(--surface-2); }
+.chart-row .lift { font-weight: 650; font-variant-numeric: tabular-nums; }
+.track { position: relative; height: 26px; }
+.track svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.chart-row .val { display: grid; line-height: 1.25; }
+.chart-row .val b { font-variant-numeric: tabular-nums; }
+.chart-row .val span { font-size: 0.78rem; }
+.axis { display: grid; grid-template-columns: 74px minmax(0, 1fr) 128px; gap: 10px; padding-inline: 4px; }
+.axis .ticks { position: relative; height: 18px; font-size: 0.75rem; color: var(--muted); }
+.axis .ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.axis .ticks .short { display: none; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 10px; }
+.tile { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; }
+.tile .k { font-size: 0.85rem; color: var(--ink-2); }
+.tile .v { font-size: 1.6rem; font-weight: 700; line-height: 1.15; }
+.advice { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 10px 10px 0; padding: 10px 14px; }
+.state { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: 600; }
+.state svg { width: 12px; height: 12px; flex: none; }
+.state.good { color: var(--good-ink); }
+.state.warn { color: var(--warn-ink); }
+.state.bad { color: var(--bad-ink); }
+.foot { font-size: 0.85rem; color: var(--muted); }
+.tooltip {
+  position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--bg);
+  padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; max-width: 260px; line-height: 1.35;
+}
+.tooltip b { display: block; font-size: 1rem; }
+
+/* Journey */
+.journey { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.steps { list-style: none; margin: 0; padding: 8px; display: grid; gap: 2px; counter-reset: step; }
+.steps button {
+  width: 100%; text-align: left; border: 0; background: transparent; border-radius: 8px; padding: 8px 10px;
+  display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: center; cursor: pointer; color: var(--ink-2);
+}
+.steps button .n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; font-weight: 700; background: var(--surface-2); color: var(--ink-2); }
+.steps button:hover { background: var(--surface-2); }
+.steps button[aria-current="step"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.steps button[aria-current="step"] .n { background: var(--accent); color: var(--accent-ink); }
+.stage { padding: 20px; display: grid; gap: 14px; }
+.stage .where { color: var(--muted); font-size: 0.9rem; }
+.stage pre {
+  margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+  font: 0.86rem/1.6 var(--font-mono); overflow-x: auto; white-space: pre;
+}
+.stage .plain { border-left: 3px solid var(--data); padding-left: 12px; color: var(--ink-2); }
+.stage-nav { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 7px 14px; cursor: pointer; font-weight: 600; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+/* Timeline */
+.timeline { padding: 18px 20px; display: grid; gap: 14px; }
+.gantt { display: grid; gap: 4px; overflow-x: auto; }
+.gantt-inner { min-width: 560px; display: grid; gap: 4px; }
+.g-row { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 10px; align-items: center; }
+.g-row button {
+  text-align: left; border: 0; background: transparent; padding: 4px 8px; border-radius: 6px; cursor: pointer; color: var(--ink-2);
+  font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.g-row button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 650; }
+.g-track { position: relative; height: 22px; }
+.g-bar { position: absolute; top: 3px; height: 16px; border-radius: 4px; background: var(--data); }
+.g-bar.sel { background: var(--accent); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
+.g-stop { position: absolute; top: -2px; width: 0; height: 26px; border-left: 2px solid var(--warn); }
+.g-axis { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 10px; }
+.g-axis .ticks { position: relative; height: 18px; font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--line); }
+.g-axis .ticks span { position: absolute; top: 2px; transform: translateX(-50%); }
+.phase-detail { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px 24px; border-top: 1px solid var(--line); padding-top: 14px; }
+.phase-detail h3 { grid-column: 1 / -1; }
+.phase-detail ul { margin: 4px 0 0; padding-left: 1.1em; display: grid; gap: 3px; color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem; color: var(--ink-2); }
+.legend i { display: inline-block; width: 14px; height: 10px; border-radius: 3px; background: var(--data); margin-right: 6px; vertical-align: middle; }
+.legend i.stop { width: 0; height: 14px; border-left: 2px solid var(--warn); border-radius: 0; background: none; }
+
+/* Cost */
+.cost { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; align-items: start; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+td.money { font-variant-numeric: tabular-nums; font-weight: 650; white-space: nowrap; }
+tr.total td { font-weight: 700; border-bottom: 0; }
+.panel { padding: 16px 18px; display: grid; gap: 10px; }
+.accounts { display: grid; gap: 10px; }
+.accounts div { display: grid; gap: 2px; }
+.accounts b { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+
+footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; display: grid; gap: 6px; }
+
+@media (max-width: 860px) {
+  .arch, .tool, .journey { grid-template-columns: minmax(0, 1fr); }
+  .detail { position: static; }
+  .steps { grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+}
+@media (max-width: 520px) {
+  .chart-row, .axis { grid-template-columns: 50px minmax(0, 1fr) 106px; gap: 6px; }
+  .chart-row .lift { font-size: 0.9rem; }
+  .g-row, .g-axis { grid-template-columns: 150px minmax(0, 1fr); }
+  .axis .ticks .long { display: none; }
+  .axis .ticks .short { display: inline; }
+  .axis .ticks .minor { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+/* Old-version notice (added 2026-10-17). */
+.oldnote { padding: 12px 16px; border: 1px solid var(--warn); border-radius: 12px; background: var(--warn-bg); color: var(--ink); max-width: 75ch; }
+</style>
+<!--body-->
+<div class="page">
+  <header class="top">
+    <p class="oldnote" role="note"><b>Old version: plan v2.2 (2026-10-15).</b> The current plan is v3.0 (2026-10-17), in <code>docs/plan/PLAN.pdf</code>. The current demo, with the For nerds map: <a href="https://claude.ai/artifact/8hkSVj3hPdpQwf8kveSaT4" target="_blank" rel="noopener">claude.ai/artifact/8hkSVj3hPdpQwf8kveSaT4</a>.</p>
+    <div class="status">
+      <span class="eyebrow">Plan v2.2 · 2026-10-15</span>
+      <span class="pill warn">Draft for your review · nothing is built yet</span>
+    </div>
+    <h1>ebook-ab-platform</h1>
+    <p class="lead">A data platform for a fictional Latin American ebook marketplace that tests ideas safely and decides what to keep, plus <i>Antes de decidir · Before You Decide</i>, a free tool where real writers see what worked for writers like them and share their own results. Everything runs at $0.</p>
+    <p class="foot">This page is the interactive companion to the plan. The full technical detail is in <code>docs/plan/PLAN.pdf</code>.</p>
+  </header>
+
+  <nav class="toc" aria-label="Sections">
+    <a href="#end">What you'll have</a>
+    <a href="#architecture">How it fits together</a>
+    <a href="#traffic">My traffic</a>
+    <a href="#journey">One purchase</a>
+    <a href="#timeline">Timeline</a>
+    <a href="#cost">Cost and accounts</a>
+  </nav>
+
+  <section id="end" aria-labelledby="end-title">
+    <div class="intro">
+      <h2 id="end-title">What you'll have at the end</h2>
+      <p>Six concrete results, about 7–8 weeks from the start of Phase 0 at 20 hours a week.</p>
+    </div>
+    <div class="outcomes">
+      <article class="card outcome"><span class="tag">Phase 6</span><h3>A public website</h3><p>At <code>pipe199x.github.io/ebook-ab-platform</code>: <i>Before You Decide</i>, a library of what worked for writers like you; the ad-test tool (<i>Plan an ad test</i>, <i>Read your ad results</i>) with anonymous sharing; <i>Real lessons</i> from 4,873 tests; and the experiments dashboard with three decisions and their evidence.</p></article>
+      <article class="card outcome"><span class="tag">Phase 7</span><h3>A pipeline that runs every day without your laptop</h3><p>GitHub Actions simulates one day of shopping and brings in the results writers shared that day. They flow into Databricks, quality is checked, the statistics and the library update, and the website refreshes.</p></article>
+      <article class="card outcome"><span class="tag">Phases 2–4</span><h3>A governed lakehouse</h3><p>Bronze, Silver and 18 Gold views, with access grants, masked personal data, tags and lineage.</p></article>
+      <article class="card outcome"><span class="tag">Phase 5</span><h3>Proof the statistics are right</h3><p>The analysis recovers the effects we planted. Fake A/B splits give false alarms at the expected ~5% rate. A broken split is detected.</p></article>
+      <article class="card outcome"><span class="tag">Phase 8</span><h3>A local job cluster</h3><p>A fresh Spark cluster starts for a run and is deleted afterwards. A performance lab on it shows before/after numbers.</p></article>
+      <article class="card outcome"><span class="tag">Phase 9</span><h3>A public repo</h3><p>Tests and green CI, a runbook, design decisions (ADRs), one-page decision memos, and a README a recruiter can read in 5 minutes.</p></article>
+    </div>
+  </section>
+
+  <section id="architecture" aria-labelledby="arch-title">
+    <div class="intro">
+      <h2 id="arch-title">How it fits together</h2>
+      <p>Data flows from top to bottom. Click any box to see what it does, why it is there, and when we build it.</p>
+    </div>
+    <div class="arch">
+      <div class="lanes" id="lanes"></div>
+      <aside class="card detail" id="detail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section id="traffic" aria-labelledby="traffic-title">
+    <div class="intro">
+      <h2 id="traffic-title">How long would my test take?</h2>
+      <p>Move the sliders to your shop's numbers. The tool shows how long you need to run an A/B test to detect each lift reliably (50/50 split, 95% confidence, 80% power). This is the math behind the free tool. A sales page like this is slow to test; ads are fast, and the tool for writers plans tests there.</p>
+    </div>
+    <div class="tool">
+      <div class="card inputs">
+        <div class="presets" role="group" aria-label="Examples">
+          <button class="preset" type="button" data-visitors="2000" data-conv="2" data-share="100">Small shop</button>
+          <button class="preset" type="button" data-visitors="20000" data-conv="2.5" data-share="100">Growing shop</button>
+          <button class="preset" type="button" data-visitors="500000" data-conv="3" data-share="50">Large marketplace</button>
+        </div>
+        <div class="field">
+          <label for="visitors">Visitors per month <output id="visitors-out" for="visitors"></output></label>
+          <input type="range" id="visitors" min="0" max="1000" step="1">
+        </div>
+        <div class="field">
+          <label for="conv">Visitors who buy <output id="conv-out" for="conv"></output></label>
+          <input type="range" id="conv" min="0.5" max="15" step="0.1">
+        </div>
+        <div class="field">
+          <label for="share">Traffic in the test <output id="share-out" for="share"></output></label>
+          <input type="range" id="share" min="10" max="100" step="5">
+        </div>
+        <p class="foot">Nothing you type leaves this page.</p>
+      </div>
+      <div class="card results">
+        <div class="chart" id="chart" role="list" aria-label="Time needed per lift"></div>
+        <div class="axis" aria-hidden="true"><span></span><div class="ticks" id="ticks"></div><span></span></div>
+        <div class="tiles">
+          <div class="tile"><span class="k">Smallest lift you can see in 4 weeks</span><span class="v num" id="mde"></span></div>
+          <div class="tile"><span class="k">Visitors needed for a +20% lift</span><span class="v num" id="need20"></span></div>
+        </div>
+        <p class="advice" id="advice"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="journey" aria-labelledby="journey-title">
+    <div class="intro">
+      <h2 id="journey-title">Follow one purchase</h2>
+      <p>One simulated shopper, seven steps, from a click to a ship / don't-ship decision. The values are an example.</p>
+    </div>
+    <div class="journey">
+      <ol class="card steps" id="steps"></ol>
+      <div class="card stage" id="stage" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="timeline" aria-labelledby="timeline-title">
+    <div class="intro">
+      <h2 id="timeline-title">Timeline</h2>
+      <p>About 146 hours of joint work (123–168), so 7–8 weeks at 20 hours a week. Every phase ends with commands for you and a STOP until you send the results. Click a phase for details.</p>
+    </div>
+    <div class="card timeline">
+      <div class="legend"><span><i></i>Phase (typical hours)</span><span><i class="stop"></i>STOP: needs your OK before an external action</span></div>
+      <div class="gantt"><div class="gantt-inner" id="gantt"></div></div>
+      <div class="phase-detail" id="phase-detail" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="cost" aria-labelledby="cost-title">
+    <div class="intro">
+      <h2 id="cost-title">Cost and accounts</h2>
+      <p>Everything is free with no expiring credits and no card. Your Claude plan, laptop and internet are outside this rule.</p>
+    </div>
+    <div class="cost">
+      <div class="card panel">
+        <h3>What it costs</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">What</th><th scope="col">Cost</th><th scope="col">Note</th></tr></thead>
+            <tbody>
+              <tr><td>Databricks Free Edition</td><td class="money">$0</td><td>Serverless only, daily fair-use quota</td></tr>
+              <tr><td>Aiven Kafka free tier</td><td class="money">$0</td><td>No card; 5 topics × 2 partitions</td></tr>
+              <tr><td>Cloudflare Workers + D1, free plan</td><td class="money">$0</td><td>Holds the anonymous shared results; 100,000 requests a day, 5 GB</td></tr>
+              <tr><td>GitHub repo, Actions, Pages</td><td class="money">$0</td><td>Public repo, standard runners</td></tr>
+              <tr><td>Docker, Kafka, Spark, Delta, React, Python libraries</td><td class="money">$0</td><td>Open source</td></tr>
+              <tr><td>Real data: Upworthy, Gutenberg</td><td class="money">$0</td><td>CC BY 4.0 / CC0 metadata</td></tr>
+              <tr class="total"><td>Total</td><td class="money">$0</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card panel">
+        <h3>What I said no to</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Option</th><th scope="col">Why not</th></tr></thead>
+            <tbody>
+              <tr><td>Real Databricks job clusters</td><td>Not in Free Edition. A paid workspace costs about $40–60 a month; the NAT gateway alone is about $33.</td></tr>
+              <tr><td>AWS</td><td>The free plan is an expiring trial: 6 months or $100–200 of credits.</td></tr>
+              <tr><td>Power BI</td><td>You chose React. Sharing would need Pro at $14 per user per month.</td></tr>
+              <tr><td>Confluent Cloud, Databricks trial</td><td>Their credits expire.</td></tr>
+              <tr><td>Supabase free, as the main store</td><td>Free projects pause after about a week of low activity. It stays the fallback.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card panel accounts">
+        <h3>Accounts</h3>
+        <div><b>New</b><span>Aiven (free Kafka, no card), about 10 minutes, at STOP S0.2: <code>console.aiven.io/signup</code>. Cloudflare (free plan for the sharing service; a card is not expected, checked at sign-up), about 5 minutes, at STOP S0.4: <code>dash.cloudflare.com/sign-up</code></span></div>
+        <div><b>Already have</b><span>Databricks Free Edition and GitHub (<code>Pipe199x</code>)</span></div>
+        <div><b>Not needed</b><span>AWS, Microsoft / Power BI, Docker Hub, npm, PyPI, Vercel, Supabase</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Next step:</b> read the PDF and this page. Then reply in Claude Code with "start Phase 0", or ask for changes and I'll revise and re-render.</p>
+    <p>Generated from plan v2.2 (2026-10-15). Works offline; it makes no network requests and stores nothing.</p>
+  </footer>
+</div>
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+
+<script>
+// Tiny A/B statistics helpers for the plan's charts, mockups and interactive companion (no dependencies).
+// Same formulas as PLAN.md §3.19: two-sided alpha, 50/50 split, normal approximations.
+(function (root) {
+  "use strict";
+
+  // Standard normal CDF via the complementary error function (Numerical Recipes erfcc, fractional error < 1.2e-7).
+  function erfc(x) {
+    const z = Math.abs(x);
+    const t = 1 / (1 + 0.5 * z);
+    const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 +
+      t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 +
+      t * (-0.82215223 + t * 0.17087277)))))))));
+    return x >= 0 ? r : 2 - r;
+  }
+  function normCdf(x) { return 0.5 * erfc(-x / Math.SQRT2); }
+
+  // Inverse normal CDF (Acklam's rational approximation, relative error < 1.15e-9).
+  function normInv(p) {
+    if (p <= 0 || p >= 1) throw new RangeError("p must be in (0, 1)");
+    const a = [-39.69683028665376, 220.9460984245205, -275.9285104469687, 138.357751867269, -30.66479806614716, 2.506628277459239];
+    const b = [-54.47609879822406, 161.5858368580409, -155.6989798598866, 66.80131188771972, -13.28068155288572];
+    const c = [-0.007784894002430293, -0.3223964580411365, -2.400758277161838, -2.549732539343734, 4.374664141464968, 2.938163982698783];
+    const d = [0.007784695709041462, 0.3224671290700398, 2.445134137142996, 3.754408661907416];
+    const lo = 0.02425, hi = 1 - lo;
+    let q, r, x;
+    if (p < lo) {
+      q = Math.sqrt(-2 * Math.log(p));
+      x = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    } else if (p <= hi) {
+      q = p - 0.5; r = q * q;
+      x = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+    } else {
+      q = Math.sqrt(-2 * Math.log(1 - p));
+      x = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    }
+    return x;
+  }
+
+  // Visitors needed per variant to detect a relative lift in a conversion rate (PLAN.md §3.19 formula).
+  function nPerArm(p1, relLift, alpha = 0.05, power = 0.8) {
+    const p2 = p1 * (1 + relLift);
+    const pBar = (p1 + p2) / 2;
+    const za = normInv(1 - alpha / 2), zb = normInv(power);
+    const num = za * Math.sqrt(2 * pBar * (1 - pBar)) + zb * Math.sqrt(p1 * (1 - p1) + p2 * (1 - p2));
+    return (num * num) / ((p2 - p1) * (p2 - p1));
+  }
+
+  // Months of traffic for both variants together, given monthly visitors and the share sent into the test.
+  function monthsNeeded(visitorsPerMonth, p1, relLift, share = 1) {
+    return (2 * nPerArm(p1, relLift)) / (visitorsPerMonth * share);
+  }
+
+  // Smallest relative lift detectable with n visitors per variant (bisection on nPerArm).
+  function mdeRel(n, p1, alpha = 0.05, power = 0.8) {
+    let lo = 1e-4, hi = Math.min(50, 1 / p1 - 1 - 1e-9);
+    if (nPerArm(p1, hi, alpha, power) > n) return Infinity;
+    for (let i = 0; i < 100; i++) {
+      const mid = (lo + hi) / 2;
+      if (nPerArm(p1, mid, alpha, power) > n) lo = mid; else hi = mid;
+    }
+    return hi;
+  }
+
+  // Two-proportion z-test: pooled test, unpooled 95% CI for the difference B - A.
+  function zTest(xA, nA, xB, nB) {
+    const pA = xA / nA, pB = xB / nB, diff = pB - pA;
+    const pPool = (xA + xB) / (nA + nB);
+    const sePool = Math.sqrt(pPool * (1 - pPool) * (1 / nA + 1 / nB));
+    const se = Math.sqrt(pA * (1 - pA) / nA + pB * (1 - pB) / nB);
+    const z = diff / sePool;
+    const zc = normInv(0.975);
+    return { pA, pB, diff, ci: [diff - zc * se, diff + zc * se], z, p: 2 * (1 - normCdf(Math.abs(z))) };
+  }
+
+  // Sample-ratio mismatch for a planned 50/50 split (chi-square, 1 df).
+  function srmP(nA, nB) {
+    const chi2 = ((nA - nB) * (nA - nB)) / (nA + nB);
+    return 2 * (1 - normCdf(Math.sqrt(chi2)));
+  }
+
+  // Normal-normal posterior on the log-odds ratio of B vs A; prior N(mu, tau^2) (tau = Infinity: flat).
+  function posterior(xA, nA, xB, nB, mu = 0, tau = Infinity) {
+    const a = xA + 0.5, b = nA - xA + 0.5, c = xB + 0.5, d = nB - xB + 0.5;
+    const est = Math.log(c / d) - Math.log(a / b);
+    const se2 = 1 / a + 1 / b + 1 / c + 1 / d;
+    const precision = 1 / se2 + (isFinite(tau) ? 1 / (tau * tau) : 0);
+    const mean = (est / se2 + (isFinite(tau) ? mu / (tau * tau) : 0)) / precision;
+    const sd = Math.sqrt(1 / precision);
+    const pBetter = normCdf(mean / sd);
+    // Expected loss (in log-odds) of choosing B: E[max(0, -theta)].
+    const phi = Math.exp(-0.5 * (mean / sd) ** 2) / Math.sqrt(2 * Math.PI);
+    const lossB = sd * phi - mean * (1 - pBetter);
+    return { est, se: Math.sqrt(se2), mean, sd, pBetter, lossB };
+  }
+
+  // Chance that a test with n per variant ends significant and positive, averaged over a prior on the true log-odds ratio.
+  function assurance(n, p1, mu, tau, alpha = 0.05) {
+    const se = Math.sqrt(2 / (n * p1 * (1 - p1)));
+    const za = normInv(1 - alpha / 2);
+    return normCdf((mu - za * se) / Math.sqrt(se * se + tau * tau));
+  }
+
+  const api = { normCdf, normInv, nPerArm, monthsNeeded, mdeRel, zTest, srmP, posterior, assurance };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.ABStats = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+</script>
+<script>
+(() => {
+  "use strict";
+  const $ = (sel) => document.querySelector(sel);
+  const make = (tag, props = {}, ...children) => {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === "class") node.className = v;
+      else if (k === "text") node.textContent = v;
+      else if (k.startsWith("aria-") || k.startsWith("data-") || k === "role" || k === "type" || k === "tabindex") node.setAttribute(k, v);
+      else node[k] = v;
+    }
+    for (const c of children) if (c != null) node.append(c);
+    return node;
+  };
+  const ICON = {
+    good: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="#0ca30c"/><path d="M3.3 6.2l1.8 1.8 3.6-3.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    warn: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .8l5.4 9.6H.6z" fill="#fab219"/><path d="M6 4.2v3" stroke="#3b2c00" stroke-width="1.4" stroke-linecap="round"/><circle cx="6" cy="8.9" r=".75" fill="#3b2c00"/></svg>',
+    bad: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="#d03b3b"/><path d="M4 4l4 4M8 4l-4 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  };
+  const state = (kind, label) => {
+    const s = make("span", { class: `state ${kind}` });
+    s.innerHTML = ICON[kind];
+    s.append(label);
+    return s;
+  };
+
+  /* ---------- Architecture ---------- */
+  const PARTS = {
+    simulator: { title: "Simulator", sub: "70,000 shoppers", where: "Your laptop (WSL) or the daily GitHub Actions run",
+      what: "Plays 70,000 fictional shoppers over 92 days. They browse, buy, pay and ask for refunds in a catalog of real public-domain books.",
+      why: "We plant known effects and faults (duplicates, late events, broken JSON), so we can prove that the pipeline and the statistics find them.",
+      facts: ["Faker es_CO plus about 2,000 real Project Gutenberg titles", "3 experiments plus 2 test fixtures (A/A, broken split)", "Payment mix and refund rates are invented, and documented as assumptions"],
+      phase: "Phase 1", cost: "$0, open source" },
+    realdata: { title: "Real data", sub: "files, not a stream", where: "Downloaded once, then uploaded to Databricks as files",
+      what: "4,873 real headline A/B tests from the Upworthy Research Archive, and the Project Gutenberg book catalog.",
+      why: "The Real lessons page and the tool's realistic expectations come from real experiments. The real catalog makes the shop believable.",
+      facts: ["Upworthy exploratory sample, CC BY 4.0", "Gutenberg metadata only (CC0): no book texts, no covers", "Tests from the archive's flagged 2013–2014 period are excluded"],
+      phase: "Probe in Phase 0, analysis in Phase 5", cost: "$0" },
+    sharing: { title: "Share endpoint", sub: "writers' results", where: "Cloudflare Workers + D1, free plan",
+      what: "Receives a writer's test result only when they press Share: genre, book language, change, and views and clicks per ad. It stores the result in a small free database.",
+      why: "A static website can't receive data. This tiny service collects anonymous results, so the community library grows with every test.",
+      facts: ["The opt-in Share is the only request that leaves the browser", "Anti-abuse: fixed lists, ranges, 5 shares per visitor a day", "No names, emails, book titles or IP addresses are stored"],
+      phase: "Probe in Phase 0, built in Phase 6", cost: "$0: Workers + D1 free plan" },
+    kafka: { title: "Kafka", sub: "5 topics", where: "Aiven free tier, local Docker, or a container inside GitHub Actions",
+      what: "Keeps every event in order, in 5 topics with 2 partitions each. Several readers can read the same events independently.",
+      why: "Kafka is the standard for event streams. The same 5 × 2 layout runs everywhere, so local tests match the cloud.",
+      facts: ["market.storefront, orders, aftersales, experiments, ops", "Events kept for 72 hours", "Producer: idempotent, zstd, 50 KiB/s"],
+      phase: "Phases 0–2", cost: "$0: Aiven free tier, no card" },
+    bridge: { title: "lakehouse-bridge", sub: "Kafka → files", where: "Your laptop or GitHub Actions",
+      what: "Reads Kafka in batches and lands each batch as one file in Databricks. It tells Kafka \"done\" only after the upload succeeds.",
+      why: "Free Edition probably cannot reach Kafka directly. File names come from Kafka positions, so a crash never creates duplicates or gaps.",
+      facts: ["Path B: always built", "File name: topic/epoch/partition/first-last.jsonl.gz", "Kill test in Phase 2: 0 duplicates, 0 gaps"],
+      phase: "Phase 2", cost: "$0" },
+    monitor: { title: "guardrail-monitor", sub: "second reader", where: "Your laptop or GitHub Actions",
+      what: "An independent consumer group with 3 members. Every hour it checks fraud flags, refunds, slow checkouts and failed payments for each experiment.",
+      why: "Shows real consumer-group behavior: one idle member, a rebalance when a member dies, alerts, and a dead-letter queue for bad records.",
+      facts: ["Writes alerts and bad records to market.ops.v1", "At-least-once processing", "Lag logged every 30 seconds"],
+      phase: "Phase 2", cost: "$0" },
+    bronze: { title: "Bronze", sub: "raw", where: "Databricks Free Edition (serverless)",
+      what: "Raw copies of every event exactly as they arrived, plus where each one came from (topic, partition, position, file).",
+      why: "If anything goes wrong later, everything can be rebuilt from Bronze.",
+      facts: ["5 Kafka tables plus 3 file tables (catalog, Upworthy, shared results)", "Auto Loader reads each file exactly once", "Full refresh is blocked, so Bronze is never wiped by accident"],
+      phase: "Phase 2", cost: "$0, within the daily quota" },
+    silver: { title: "Silver", sub: "checked, cleaned", where: "Databricks Free Edition (serverless)",
+      what: "Checked and cleaned events: typed columns, duplicates removed, personal data hashed or masked, bad records sent to quarantine.",
+      why: "Every number in Gold is only as good as Silver. A rule stops the flow if personal data appears in clear text.",
+      facts: ["Duplicates removed within a 1-hour window", "A users table that keeps history (SCD2)", "Tags for Colombian data laws (Ley 1581, Ley 1266)"],
+      phase: "Phase 3", cost: "$0" },
+    gold: { title: "Gold", sub: "18 views", where: "Databricks Free Edition (serverless)",
+      what: "The summaries people read: experiment metrics, sales, funnel, payments, top books, real-data lessons, and data health.",
+      why: "Each view names who uses it. If nobody uses a view, it does not exist (v1 had 41; v2 has 18).",
+      facts: ["Experiments 8 · market 3 · payments 2 · catalog 1 · real data 2 · ops 2", "Granted to readers; no personal data", "Dates in Bogotá time"],
+      phase: "Phase 4", cost: "$0" },
+    analysis: { title: "Statistics", sub: "ship / don't ship", where: "Databricks notebooks",
+      what: "First checks that each test is valid. Then it applies rules written before the data and writes a decision and a one-page memo.",
+      why: "Rules written first stop anyone from moving the goalposts after seeing the score.",
+      facts: ["Split check (SRM), A/A check, invariants", "z-test, Welch + bootstrap, CUPED, Holm and BH corrections", "Proved against the effects we planted", "Also builds the community library from shared results"],
+      phase: "Phase 5", cost: "$0" },
+    actions: { title: "GitHub Actions", sub: "daily run", where: "GitHub, free for public repos",
+      what: "Runs the tests on every change. Once a day it simulates a day of shopping, runs the whole pipeline, and refreshes the website.",
+      why: "Proves every day that the platform works end to end, without your laptop and at $0.",
+      facts: ["Daily at 06:00 Bogotá (11:00 UTC)", "A fresh Kafka container for each run", "Imports the day's shared results from Cloudflare", "Exports small Gold summaries as JSON files"],
+      phase: "Phase 7", cost: "$0" },
+    website: { title: "Public website", sub: "GitHub Pages", where: "GitHub Pages",
+      what: "Before You Decide (the community library and the ad-test tool), plus the three experiment decisions and the real lessons. Spanish and English.",
+      why: "Results reach people. The tool runs in the browser, so a writer's numbers stay on their computer unless they choose to share.",
+      facts: ["React + TypeScript", "No cookies, no analytics, no tokens in the browser", "The library refreshes every night", "Works offline after the first load"],
+      phase: "Phase 6", cost: "$0" },
+    sellers: { title: "Writers", sub: "Before You Decide", where: "Anywhere, in the browser",
+      what: "Writers check what worked for writers like them, plan an ad test (for how long, at what cost), read the result (use B, keep A, or not sure yet), and can share it anonymously.",
+      why: "This is the real-world impact: better decisions for writers who can't afford mistakes. Each shared result helps the next writer.",
+      facts: ["What worked for writers like you", "Plan an ad test · Read your ad results", "Share a result anonymously (opt-in)"],
+      phase: "Phase 6", cost: "Free for them too" },
+    cluster: { title: "Local job cluster", sub: "practice Spark", where: "Docker on your laptop",
+      what: "A fresh Spark cluster (1 master + 2 workers) is created for a run and deleted after it, like a Databricks job cluster.",
+      why: "Real job clusters cost money and are not in Free Edition. This gives the same lifecycle and the Spark UI at $0.",
+      facts: ["Hosts the performance lab: skew, broadcast join, file sizes", "Shares transform code with Databricks", "Never left running"],
+      phase: "Phase 8", cost: "$0" },
+  };
+  const LANES = [
+    { label: "1 · Make the data", note: "the simulator writes to Kafka; real data and writers' shared results travel as files", items: ["simulator", "realdata", "sharing"] },
+    { label: "2 · Move it", note: "Kafka keeps events; two independent readers", items: ["kafka", "→", "bridge", "·", "monitor"] },
+    { label: "3 · Clean it and decide", note: "Databricks Free Edition, one pipeline", items: ["bronze", "→", "silver", "→", "gold", "→", "analysis"] },
+    { label: "4 · Show it", note: "every day, without your laptop", items: ["actions", "→", "website", "→", "sellers"] },
+    { label: "On the side", note: "a $0 stand-in for job clusters", items: ["cluster"] },
+  ];
+  const lanes = $("#lanes"), detail = $("#detail");
+  const boxes = {};
+  LANES.forEach((lane, i) => {
+    const row = make("div", { class: "boxes" });
+    for (const id of lane.items) {
+      if (id === "→" || id === "·") { row.append(make("span", { class: "arrow", "aria-hidden": "true", text: id })); continue; }
+      const p = PARTS[id];
+      const b = make("button", { class: "box", type: "button", "aria-pressed": "false", "data-id": id }, make("b", { text: p.title }), make("small", { text: p.sub }));
+      b.addEventListener("click", () => select(id));
+      boxes[id] = b;
+      row.append(b);
+    }
+    lanes.append(make("div", { class: "card lane" }, make("div", { class: "lane-head" }, make("span", { class: "eyebrow", text: lane.label }), make("span", { text: lane.note })), row));
+    if (i < 3) lanes.append(make("div", { class: "down", "aria-hidden": "true", text: "↓" }));
+  });
+  function select(id) {
+    for (const [k, b] of Object.entries(boxes)) b.setAttribute("aria-pressed", String(k === id));
+    const p = PARTS[id];
+    const facts = make("ul");
+    p.facts.forEach((f) => facts.append(make("li", { text: f })));
+    detail.replaceChildren(
+      make("div", {}, make("h3", { text: p.title }), make("p", { class: "where", text: p.where })),
+      make("dl", {},
+        make("div", {}, make("dt", { text: "What it does" }), make("dd", { text: p.what })),
+        make("div", {}, make("dt", { text: "Why it is there" }), make("dd", { text: p.why })),
+        make("div", {}, make("dt", { text: "Key facts" }), make("dd", {}, facts)),
+      ),
+      make("div", { class: "facts-row" }, make("span", { class: "pill", text: `Built in ${p.phase}` }), make("span", { class: "pill", text: p.cost })),
+    );
+  }
+  select("simulator");
+
+  /* ---------- Traffic tool ---------- */
+  const LIFTS = [0.05, 0.1, 0.2, 0.3, 0.5, 1.0];
+  const MIN_V = 300, MAX_V = 2000000;
+  const vEl = $("#visitors"), cEl = $("#conv"), sEl = $("#share");
+  const toSlider = (v) => Math.round(1000 * Math.log(v / MIN_V) / Math.log(MAX_V / MIN_V));
+  const fromSlider = (s) => {
+    const raw = MIN_V * Math.pow(MAX_V / MIN_V, s / 1000);
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)) - 1);
+    return Math.round(raw / mag) * mag;
+  };
+  const fmtInt = (n) => Math.round(n).toLocaleString("en-US");
+  const fmt1 = (n) => n.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const DAY = 365.25 / 12; // days per month
+  const MIN_DAYS = 5, MAX_DAYS = 30 * 365.25;
+  function span(months) {
+    const days = months * DAY;
+    if (days < 14) return `${Math.max(1, Math.round(days))} days`;
+    if (months < 2) return `${Math.round(days / 7)} weeks`;
+    if (months < 24) return `${fmt1(months)} months`;
+    return `${fmt1(months / 12)} years`;
+  }
+  const xPos = (days) => {
+    const d = Math.min(Math.max(days, MIN_DAYS), MAX_DAYS);
+    return (Math.log(d / MIN_DAYS) / Math.log(MAX_DAYS / MIN_DAYS)) * 100;
+  };
+  // [days, label, short label, minor (hidden on phones)]
+  const TICKS = [[7, "1 week", "1 wk", true], [DAY, "1 month", "1 mo"], [3 * DAY, "3 months", "3 mo", true], [365.25, "1 year", "1 yr"], [5 * 365.25, "5 years", "5 yr", true], [20 * 365.25, "20 years", "20 yr"]];
+  const ticks = $("#ticks");
+  TICKS.forEach(([d, label, short, minor]) => {
+    const s = make("span", { class: minor ? "minor" : "" }, make("span", { class: "long", text: label }), make("span", { class: "short", text: short }));
+    s.style.left = `${xPos(d)}%`;
+    ticks.append(s);
+  });
+
+  const chart = $("#chart"), tooltip = $("#tooltip");
+  const rows = LIFTS.map((lift) => {
+    const row = make("div", { class: "chart-row", role: "listitem", tabindex: "0" });
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("aria-hidden", "true");
+    svg.innerHTML = '<line x1="0" x2="100%" y1="50%" y2="50%" style="stroke: var(--line)" stroke-width="1"/>' +
+      TICKS.map(([d]) => `<line x1="${xPos(d)}%" x2="${xPos(d)}%" y1="15%" y2="85%" style="stroke: var(--line)" stroke-width="1"/>`).join("") +
+      '<line class="bar" x1="0" y1="50%" y2="50%" style="stroke: var(--data-soft)" stroke-width="8" stroke-linecap="round"/>' +
+      '<circle class="dot" cy="50%" r="7" style="fill: var(--data); stroke: var(--surface)" stroke-width="2"/>';
+    const track = make("div", { class: "track" });
+    track.append(svg);
+    const val = make("div", { class: "val" });
+    row.append(make("span", { class: "lift", text: `+${Math.round(lift * 100)}%` }), track, val);
+    chart.append(row);
+    const show = (ev) => {
+      const r = row._result;
+      if (!r) return;
+      tooltip.replaceChildren(make("b", { text: span(r.months) }), `to detect a +${Math.round(lift * 100)}% lift: ${fmtInt(r.total)} visitors in the test (${fmtInt(r.perArm)} per version)`);
+      tooltip.hidden = false;
+      const box = row.getBoundingClientRect();
+      const x = ev && ev.clientX ? ev.clientX : box.left + box.width / 2;
+      tooltip.style.left = `${Math.min(window.innerWidth - tooltip.offsetWidth - 8, Math.max(8, x - tooltip.offsetWidth / 2))}px`;
+      tooltip.style.top = `${Math.max(8, box.top - tooltip.offsetHeight - 6)}px`;
+    };
+    row.addEventListener("pointermove", show);
+    row.addEventListener("focus", () => show());
+    row.addEventListener("pointerleave", () => { tooltip.hidden = true; });
+    row.addEventListener("blur", () => { tooltip.hidden = true; });
+    return { lift, row, svg, val };
+  });
+  window.addEventListener("scroll", () => { tooltip.hidden = true; }, { passive: true });
+
+  function update() {
+    const visitors = fromSlider(Number(vEl.value));
+    const conv = Number(cEl.value) / 100;
+    const share = Number(sEl.value) / 100;
+    $("#visitors-out").textContent = fmtInt(visitors);
+    $("#conv-out").textContent = `${fmt1(conv * 100)}%`;
+    $("#share-out").textContent = `${Math.round(share * 100)}%`;
+    const inTest = visitors * share;
+    for (const r of rows) {
+      const perArm = Math.ceil(ABStats.nPerArm(conv, r.lift));
+      const months = (2 * perArm) / inTest;
+      const days = months * DAY;
+      r.row._result = { months, perArm, total: 2 * perArm };
+      const x = xPos(days);
+      r.svg.querySelector(".bar").setAttribute("x2", `${x}%`);
+      r.svg.querySelector(".dot").setAttribute("cx", `${x}%`);
+      const kind = months <= 3 ? "good" : months <= 12 ? "warn" : "bad";
+      const label = kind === "good" ? "Fits in 3 months" : kind === "warn" ? "Up to a year" : "Over a year";
+      const text = days > MAX_DAYS ? "over 30 years" : span(months);
+      r.val.replaceChildren(make("b", { text }), state(kind, label));
+      r.row.setAttribute("aria-label", `+${Math.round(r.lift * 100)}% lift: ${text}. ${label}.`);
+    }
+    const perArm4w = (inTest * 12 / 365.25) * 28 / 2;
+    const mde = ABStats.mdeRel(perArm4w, conv);
+    $("#mde").textContent = isFinite(mde) && mde <= 5 ? `+${Math.round(mde * 100)}%` : "over +500%";
+    $("#need20").textContent = fmtInt(2 * Math.ceil(ABStats.nPerArm(conv, 0.2)));
+    let advice;
+    if (mde <= 0.05) advice = "You have plenty of traffic. You can test small tweaks to titles, covers and copy, and still decide within a month.";
+    else if (mde <= 0.15) advice = "You can test medium changes within a month. Small tweaks (under +10%) still take a long time, so test bolder versions.";
+    else if (mde <= 0.4) advice = "Test big changes only: bundles, offers, how the price is shown. Small tweaks would take more than a year to read.";
+    else advice = "A/B tests will be slow for you. Test only very big changes in ads, and check what worked for other writers before you decide.";
+    $("#advice").textContent = advice;
+    document.querySelectorAll(".preset").forEach((b) => {
+      b.setAttribute("aria-pressed", String(Number(b.dataset.visitors) === visitors && Number(b.dataset.conv) === Math.round(conv * 1000) / 10 && Number(b.dataset.share) === Math.round(share * 100)));
+    });
+  }
+  function applyPreset(b) {
+    vEl.value = toSlider(Number(b.dataset.visitors));
+    cEl.value = b.dataset.conv;
+    sEl.value = b.dataset.share;
+    update();
+  }
+  [vEl, cEl, sEl].forEach((el) => el.addEventListener("input", update));
+  document.querySelectorAll(".preset").forEach((b) => b.addEventListener("click", () => applyPreset(b)));
+  applyPreset(document.querySelector(".preset"));
+
+  /* ---------- Journey ---------- */
+  const STEPS = [
+    { title: "A shopper opens a book page", where: "Simulator · topic market.storefront.v1",
+      text: "A simulated shopper in Medellín opens Don Quijote. They are in the treatment group of the cover test (EXP-PDP-002), so they see the new cover and subtitle.",
+      data: "event_type   product_viewed\nbook_id      pg-2000  (Don Quijote, real Gutenberg number)\nuser_id      u_0012345 · Medellín · android\nexperiment   EXP-PDP-002 → treatment\nevent_ts     2026-07-14 18:57 (Bogotá)",
+      plain: "Every click becomes a small message called an event." },
+    { title: "Kafka keeps it in order", where: "Kafka · 5 topics × 2 partitions",
+      text: "The event goes to the storefront topic. The key is the shopper, so all of this shopper's events stay in order in the same partition.",
+      data: "topic      market.storefront.v1\nkey        u_0012345  →  partition 1\noffset     48,211\nkept for   72 hours",
+      plain: "Kafka is like a post office. It keeps every letter in order, and several readers can collect the same letters independently." },
+    { title: "The bridge lands a file", where: "lakehouse-bridge · UC volume landing/",
+      text: "The bridge reads positions 48,000–48,999 and uploads them as one file. Only after the upload does it tell Kafka \"done\". If it crashes, the retry writes the same file name with the same bytes, so nothing is counted twice.",
+      data: "landing/market.storefront.v1/bf-01/1/\n  48000-48999.jsonl.gz      uploaded (overwrite = false)\ncommit offset               49,000",
+      plain: "No duplicates, no gaps, even if the laptop dies in the middle." },
+    { title: "Bronze keeps it, Silver cleans it", where: "Databricks · bronze.storefront_raw → silver.storefront_events",
+      text: "Bronze stores the raw event and where it came from. Silver parses it, removes the duplicate copy the simulator planted, and hides personal data.",
+      data: "bronze.storefront_raw     partition 1 · offset 48,211 · path B\nsilver.storefront_events  product_viewed · pg-2000 · treatment\n  duplicate copies        1 removed\n  email                   masked (keyed SHA-256 for joins)",
+      plain: "Bronze holds the original letters. Silver holds checked, cleaned copies." },
+    { title: "Gold summarizes", where: "Databricks · gold.exp_user_metrics_pdp",
+      text: "Gold keeps one row per shopper who saw the test: did they buy within 24 hours? Did they ask for a refund within 7 days?",
+      data: "gold.exp_user_metrics_pdp\n  user        u_0012345 (hashed)\n  variant     treatment\n  bought_24h  1\n  refund_7d   1",
+      plain: "Gold holds the summaries people actually read." },
+    { title: "Rules written before the test decide", where: "Notebook 10_ab_analysis · gold.experiment_results",
+      text: "The analysis first checks that the split is fair. Then it applies the pre-registered rule: ship only if buyers go up and refunds do not go up too much.",
+      data: "split check (SRM)     p = 0.41        ✓ fair\nbought within 24 h    4.0% → 4.7%     ✓ up\nrefunds within 7 d    allowed +0.25 pts at most   ✗ failed\ndecision              DON'T SHIP",
+      plain: "Like a referee who sets the rules before the game. Nobody can move the goalposts after seeing the score." },
+    { title: "The website shows the decision", where: "GitHub Actions · GitHub Pages",
+      text: "The next morning, GitHub Actions exports the result as a small JSON file and the website shows the decision with its evidence.",
+      data: "web/public/data/portfolio.json\n  EXP-PDP-002   don't ship   refunds up\n  data as of    2026-08-10",
+      plain: "The new cover sold more books, but people returned them. The rules caught it." },
+  ];
+  const stepsEl = $("#steps"), stage = $("#stage");
+  const stepButtons = STEPS.map((s, i) => {
+    const b = make("button", { type: "button" }, make("span", { class: "n", text: String(i + 1) }), make("span", { text: s.title }));
+    b.addEventListener("click", () => go(i));
+    stepsEl.append(make("li", {}, b));
+    return b;
+  });
+  let current = 0;
+  function go(i) {
+    current = Math.max(0, Math.min(STEPS.length - 1, i));
+    stepButtons.forEach((b, j) => (j === current ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current")));
+    const s = STEPS[current];
+    const prev = make("button", { class: "btn", type: "button", text: "← Previous" });
+    const next = make("button", { class: "btn primary", type: "button", text: current === STEPS.length - 1 ? "Start again" : "Next step →" });
+    prev.disabled = current === 0;
+    prev.addEventListener("click", () => go(current - 1));
+    next.addEventListener("click", () => go(current === STEPS.length - 1 ? 0 : current + 1));
+    stage.replaceChildren(
+      make("div", {}, make("span", { class: "eyebrow", text: `Step ${current + 1} of ${STEPS.length}` }), make("h3", { text: s.title }), make("p", { class: "where", text: s.where })),
+      make("p", { text: s.text }),
+      make("pre", { text: s.data, "aria-label": "Example data at this step" }),
+      make("p", { class: "plain", text: s.plain }),
+      make("div", { class: "stage-nav" }, prev, next),
+    );
+  }
+  stage.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") go(current + 1);
+    if (e.key === "ArrowLeft") go(current - 1);
+  });
+  go(0);
+
+  /* ---------- Timeline ---------- */
+  const PHASES = [
+    { n: 0, name: "Feasibility spike", lo: 9, hi: 12, stops: ["S0.1 OK the public repo, secret scanning and the Pages placeholder", "S0.2 Aiven sign-up", "S0.3 LinkedIn verification, only if the Path A probes fail", "S0.4 Cloudflare sign-up (free plan)"],
+      does: ["Repo, local tools, Databricks catalog, schemas and volume", "Probes: Files API, Kafka from WSL, Path A T1–T5, a Cloudflare Worker + D1", "Local job-cluster spike; real-data probe"],
+      you: ["OK the public repo (S0.1)", "Run about 6 sudo lines for Docker", "Log in to Databricks; sign up to Aiven (S0.2) and Cloudflare (S0.4)"] },
+    { n: 1, name: "Simulator + catalog", lo: 14, hi: 18, stops: [],
+      does: ["Configs, contracts and the real Gutenberg catalog", "Simulator with backfill and live modes, planted faults", "Pre-registrations frozen before any full data"],
+      you: ["Run the tests and the local 70k backfill", "Paste the output"] },
+    { n: 2, name: "Kafka groups + Bronze", lo: 10, hi: 14, stops: [],
+      does: ["lakehouse-bridge and guardrail-monitor", "Bronze pipeline (Auto Loader + file tables)", "Full Aiven backfill, kill test, rebalance demo"],
+      you: ["Deploy the bundle and run the pipeline", "Run the duplicate and gap queries"] },
+    { n: 3, name: "Silver", lo: 12, hi: 16, stops: [],
+      does: ["Parsing, dedup, quarantine", "Users with history (SCD2), masks and tags"],
+      you: ["Check reconciliation: all PASS"] },
+    { n: 4, name: "Gold: 18 views", lo: 8, hi: 10, stops: [],
+      does: ["YAML-driven view factory, grants, data dictionary"],
+      you: ["Count views per domain: 8, 3, 2, 1, 2, 2"] },
+    { n: 5, name: "Analysis + real data", lo: 16, hi: 21, stops: [],
+      does: ["Stats library with oracle tests", "Validation proofs (a), (b), (c)", "Real-data lessons and 3 decision memos", "Community pipeline and library summary, tested on a fixture"],
+      you: ["Run the stats tests and the result queries"] },
+    { n: 6, name: "Website + library", lo: 26, hi: 36, stops: ["S6.1 first public deploy of the real website and the share endpoint"],
+      does: ["6 pages in Spanish and English, starting with the community library", "Share dialog, share endpoint (Cloudflare Worker + D1), anti-abuse rules", "TypeScript stats checked against Python", "Privacy check: no third-party requests; only the opt-in Share"],
+      you: ["OK the first public deploy (S6.1)"] },
+    { n: 7, name: "Orchestration + daily run", lo: 14, hi: 19, stops: ["S7.1 repo secrets (Databricks, Cloudflare) and the daily public refresh"],
+      does: ["Lakeflow jobs, CI/CD workflows", "Daily laptop-free run, with the import of shared results", "Plain Structured Streaming track"],
+      you: ["OK the repo secrets and the daily schedule (S7.1)"] },
+    { n: 8, name: "Job cluster + performance", lo: 8, hi: 12, stops: [],
+      does: ["Local job-cluster runner", "Spark UI performance lab", "Delta operations demos"],
+      you: ["Run the lab; confirm no containers are left"] },
+    { n: 9, name: "Docs + report", lo: 6, hi: 10, stops: [],
+      does: ["README, runbook, ADRs, memos, report", "Clean-clone dry run of the runbook"],
+      you: ["Review the site, the memos and the report"] },
+  ];
+  const mid = (p) => (p.lo + p.hi) / 2;
+  const totalH = PHASES.reduce((a, p) => a + mid(p), 0);
+  const gantt = $("#gantt"), pd = $("#phase-detail");
+  let at = 0;
+  const phaseButtons = PHASES.map((p) => {
+    const start = at; at += mid(p);
+    const btn = make("button", { type: "button", "aria-pressed": "false", text: `${p.n} · ${p.name}` });
+    const track = make("div", { class: "g-track" });
+    const bar = make("div", { class: "g-bar" });
+    bar.style.left = `${(start / totalH) * 100}%`;
+    bar.style.width = `${(mid(p) / totalH) * 100}%`;
+    track.append(bar);
+    if (p.stops.length) { const s = make("div", { class: "g-stop", title: "STOP" }); s.style.left = `${(start / totalH) * 100}%`; track.append(s); }
+    btn.addEventListener("click", () => pick(p.n));
+    gantt.append(make("div", { class: "g-row" }, btn, track));
+    return { btn, bar };
+  });
+  const axisTicks = make("div", { class: "ticks" });
+  // Skip a last tick that would sit on the right edge and get clipped.
+  for (let w = 0; w * 20 / totalH <= 0.95; w++) {
+    const s = make("span", { text: w === 0 ? "start" : `week ${w}` });
+    s.style.left = `${(w * 20 / totalH) * 100}%`;
+    axisTicks.append(s);
+  }
+  gantt.append(make("div", { class: "g-axis" }, make("span"), axisTicks));
+  function pick(n) {
+    phaseButtons.forEach((b, i) => { b.btn.setAttribute("aria-pressed", String(i === n)); b.bar.classList.toggle("sel", i === n); });
+    const p = PHASES[n];
+    const list = (items) => { const ul = make("ul"); items.forEach((t) => ul.append(make("li", { text: t }))); return ul; };
+    const parts = [
+      make("h3", { text: `Phase ${p.n}: ${p.name} · ${p.lo}–${p.hi} hours` }),
+      make("div", {}, make("span", { class: "eyebrow", text: "I do" }), list(p.does)),
+      make("div", {}, make("span", { class: "eyebrow", text: "You do" }), list(p.you)),
+    ];
+    if (p.stops.length) parts.push(make("div", {}, make("span", { class: "eyebrow", text: "STOP points" }), list(p.stops)));
+    else parts.push(make("div", {}, make("span", { class: "eyebrow", text: "STOP points" }), make("p", { class: "foot", text: "Only the usual end-of-phase STOP: I wait for your results." })));
+    pd.replaceChildren(...parts);
+  }
+  pick(0);
+
+  // Deep links: open a phase or step from the hash, e.g. #phase-6 or #step-3.
+  const hash = location.hash.slice(1);
+  const m = hash.match(/^(phase|step)-(\d+)$/);
+  if (m && m[1] === "phase" && PHASES[+m[2]]) { pick(+m[2]); $("#timeline").scrollIntoView(); }
+  if (m && m[1] === "step" && STEPS[+m[2] - 1]) { go(+m[2] - 1); $("#journey").scrollIntoView(); }
+})();
+</script>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Figure: a vote's journey through the platform</title>
+<link rel="stylesheet" href="ls-figs.css">
+<style>
+  .wrap { padding: 20px 24px; display: grid; gap: 16px; }
+  .lane { display: grid; gap: 8px; }
+  .lane > b { font-size: 14px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+  .steps { display: flex; align-items: stretch; }
+  .st { flex: 1; border-radius: 10px; background: var(--surface); border: 1.5px solid var(--line); padding: 9px 10px; font-size: 14px; font-weight: 700; line-height: 1.25; display: grid; align-content: center; min-width: 0; }
+  .st small { display: block; font-weight: 400; font-size: 12.5px; color: var(--ink-2); margin-top: 3px; }
+  .st.edge { border-color: #f0b38f; background: #fff6f0; }
+  .st.lake { border-color: #a9b8e8; background: #f2f5fd; }
+  .st.site { border-color: #9fd3b6; background: #f1faf4; }
+  .arrow { width: 22px; flex: none; display: grid; place-items: center; color: var(--muted); font-size: 18px; font-weight: 700; }
+  .note { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body data-render="1000x310@2">
+<div class="wrap">
+  <div class="lane"><b>Live · seconds</b>
+    <div class="steps">
+      <div class="st">A reader's phone<small>one version, one tap</small></div><div class="arrow">→</div>
+      <div class="st edge">Cloudflare Worker + D1<small>counts only · no cookies · IP kept ≤ 1 day</small></div><div class="arrow">→</div>
+      <div class="st site">The writer's progress page<small>no peeking until the target</small></div>
+    </div>
+  </div>
+  <div class="lane"><b>Every day · no laptop</b>
+    <div class="steps">
+      <div class="st edge">D1 export<small>new votes since yesterday</small></div><div class="arrow">→</div>
+      <div class="st">Kafka<small>market.duels.v1</small></div><div class="arrow">→</div>
+      <div class="st lake">Bronze<small>every raw vote</small></div><div class="arrow">→</div>
+      <div class="st lake">Silver<small>double votes · bots · SRM</small></div><div class="arrow">→</div>
+      <div class="st lake">Gold<small>Duel results · library</small></div><div class="arrow">→</div>
+      <div class="st site">library.json<small>on the website</small></div>
+    </div>
+  </div>
+  <p class="note">The same daily run that already carries the simulated store's events (plan §3.17). Real votes make the platform process real traffic.</p>
+</div>
+</body>
+</html>

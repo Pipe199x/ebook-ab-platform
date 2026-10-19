@@ -1,0 +1,20 @@
+flowchart TB
+  subgraph SRC["Laptop (WSL2)"]
+    direction LR
+    PROD["simulator<br/>Faker es_CO + real catalog,<br/>idempotent, zstd, 50 KiB/s"]
+    MON["guardrail-monitor<br/>consumer group x3<br/>alerts and DLQ to market.ops.v1"]
+    PROD ~~~ MON
+  end
+  subgraph KAFKA["Aiven Kafka free tier"]
+    TOP["5 topics x 2 partitions<br/>storefront, orders, aftersales, experiments, ops"]
+  end
+  subgraph DBX["Databricks Free Edition (serverless): one SDP pipeline, run by a Lakeflow Job"]
+    direction LR
+    BR["Bronze<br/>streaming tables<br/>Spark Kafka source"] --> SV["Silver<br/>streaming tables<br/>SCD2 users, PII masks"] --> GD["Gold<br/>20 materialized<br/>views"] --> NB["analysis notebooks<br/>experiment_results"]
+  end
+  subgraph WEB["Public website (GitHub Pages)"]
+    SITE["React site<br/>JSON exported by CI"]
+  end
+  SRC -->|"produce; monitor consumes"| KAFKA
+  KAFKA -->|"SASL_SSL, Trigger.AvailableNow"| DBX
+  DBX -->|"Gold summaries"| WEB

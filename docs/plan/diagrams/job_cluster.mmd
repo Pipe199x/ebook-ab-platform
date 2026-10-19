@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant R as job_cluster runner<br/>(WSL)
+  participant D as Docker Engine
+  participant M as spark-master
+  participant W as spark-worker x2
+  participant S as submit container<br/>(driver)
+  R->>D: compose up -p jc-run_id<br/>(master + 2 workers)
+  D->>M: start
+  D->>W: start, register<br/>with master
+  R->>M: poll /json until<br/>2 workers ALIVE
+  R->>S: spark-pipelines run<br/>--master spark://master:7077
+  S->>W: executors run tasks<br/>(Spark UI :4040)
+  S-->>R: exit code + event log
+  R->>D: compose down<br/>(always, even on failure)
+  Note over R,M: same lifecycle as a Databricks job cluster:<br/>created for the run, deleted after it

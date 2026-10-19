@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup: Before You Decide on launch day</title>
+<link rel="stylesheet" href="../../old/mockups-v2.3/mockup.css">
+<link rel="stylesheet" href="answers-figs.css">
+<style>
+  main { gap: 12px; }
+  .left { flex: 1.5; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .right { flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+  h1 { margin: 0; font-size: 16px; }
+  .filters, .changes { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font-size: 11.5px; color: var(--ink-2); }
+  .sel { position: relative; padding: 1px 20px 1px 8px; border: 1px solid #cfcdc6; border-radius: 6px; background: var(--surface); color: var(--ink); font-weight: 600; font-size: 12px; }
+  .sel::after { content: "\25BE"; position: absolute; right: 7px; top: 1px; color: var(--muted); font-size: 11px; }
+  .count { margin-left: auto; padding: 2px 8px; border-radius: 10px; background: #eef4fb; color: var(--accent); font-size: 10.5px; font-weight: 600; }
+  .opt { padding: 1px 8px; border: 1px solid #cfcdc6; border-radius: 10px; background: var(--surface); color: var(--ink); }
+  .opt.on { border-color: var(--accent); background: #e4edf7; font-weight: 600; }
+  .ev { display: flex; flex-direction: column; gap: 6px; }
+  .ev .top { display: flex; align-items: center; gap: 8px; }
+  .ev h2 { font-size: 12.5px; margin: 0; }
+  .ev .top .src { margin-left: auto; }
+  .need { display: flex; align-items: center; gap: 10px; }
+  .need b { font-size: 15px; }
+  .ev p { margin: 0; font-size: 12px; line-height: 1.4; }
+  .meanwhile { border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; background: #faf9fd; }
+  .meanwhile .h { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; margin-bottom: 3px; }
+  .btn { align-self: flex-start; padding: 5px 11px; border-radius: 6px; background: var(--accent); color: #fff; font-weight: 600; font-size: 11.5px; }
+  .right h2 { font-size: 11.5px; margin: 0 0 4px; }
+  .rk { display: grid; grid-template-columns: 82px 1fr 44px; gap: 6px; align-items: center; font-size: 11.5px; margin: 3px 0; }
+  .rk .v { text-align: right; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .share { display: flex; gap: 7px; align-items: flex-start; }
+  .share svg { width: 14px; height: 14px; flex: none; margin-top: 1px; }
+</style>
+</head>
+<body data-render="720x450@3">
+<div class="window">
+  <div class="chrome"><i></i><i></i><i></i><div class="url">pipe199x.github.io/ebook-ab-platform/</div><div class="ribbon">MOCKUP · launch day</div></div>
+  <div class="site"><b>Before You Decide</b><span class="on">What worked</span><span>Plan a test</span><span>Your results</span><span>Real lessons</span><span>Test store</span><span class="lang">ES · <strong>EN</strong></span></div>
+  <div class="banner">Launch day · no results shared yet · every number here will come from writers who press Share</div>
+  <main>
+    <div class="left">
+      <h1>What worked for writers like you</h1>
+      <div class="filters">Writers like you: <span class="sel">Romance</span><span class="sel">Spanish</span><span class="count">0 results shared so far</span></div>
+      <div class="changes">Change: <span class="opt on">Cover</span><span class="opt">Title</span><span class="opt">Blurb</span><span class="opt">Price display</span><span class="opt">Bundle</span></div>
+      <div class="card ev">
+        <div class="top"><h2>Cover changes · romance in Spanish</h2><span class="src shared" data-src="shared"></span></div>
+        <div class="need"><b>0 of 5</b><span class="meter" data-n="0"></span><span class="note">results needed before we show numbers</span></div>
+        <p><b>Not enough results yet: be one of the first.</b> We don't guess. Numbers appear when 5 writers like you have shared a cover test.</p>
+        <div class="meanwhile">
+          <div class="h">Meanwhile, from 4,873 real tests <span class="src public" data-src="public"></span></div>
+          <p>Most changes move clicks only a little. Test a bold new cover, not a small tweak.</p>
+        </div>
+        <div class="advice">You can still plan your test and read your result today. The tool works without the library.</div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <h2>What works best here</h2>
+        <div class="note" style="margin-bottom: 4px">We rank the five changes once each has 5 results.</div>
+        <div id="rank"></div>
+      </div>
+      <div class="btn">Plan this test ▸</div>
+      <div class="share note">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="var(--accent)"/><path d="M8 7v4.2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4.6" r="1" fill="#fff"/></svg>
+        <span>After your test, share the result. It's anonymous, and it counts toward the 5.</span>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="answers-figs.js"></script>
+<script>
+  document.getElementById("rank").innerHTML = ["Cover", "Title", "Blurb", "Price display", "Bundle"].map((name) =>
+    `<div class="rk"><span>${name}</span><span class="meter" data-n="0"></span><span class="v">0 of 5</span></div>`).join("");
+  AnswersFigs.decorate();
+</script>
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en" data-header="ebook-ab-platform · Answers to your questions about plan v2.2 · 2026-10-15">
+<head>
+<meta charset="utf-8">
+<title>Answers to your questions about plan v2.2</title>
+<!-- Printed to ANSWERS-v2.2.pdf by tools/render_answers.sh. Every number below is computed with render/abstats.js. -->
+<link rel="stylesheet" href="figs/answers-figs.css">
+<style>
+  :root {
+    --ink: #0b0b0b; --ink-2: #52514e; --muted: #696969; --line: #d9d8d2;
+    --accent: #1f4e79; --tint: #eef4fb; --series-1: #2a78d6;
+    --good: #0ca30c; --critical: #d03b3b; --warning: #fab219;
+    --tint-good: #e7f5e7; --tint-bad: #fbe9e9; --tint-warn: #fff4dc;
+  }
+  @page { size: A4; margin: 19mm 16mm 17mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; }
+  body { font-family: "Noto Sans", "DejaVu Sans", sans-serif; font-size: 9.6pt; line-height: 1.45; color: var(--ink); }
+  p { margin: 0 0 2.2mm; }
+  ul, ol { margin: 0 0 2.2mm; padding-left: 5mm; }
+  li { margin: 0.6mm 0; }
+  b, strong { font-weight: 700; }
+  a { color: #1a5fb4; text-decoration: none; }
+  h2 { font-size: 11pt; color: var(--accent); margin: 4.5mm 0 1.8mm; break-after: avoid; }
+  h3 { font-size: 9.8pt; margin: 3mm 0 1.2mm; break-after: avoid; }
+  .num { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--ink-2); }
+  .small { font-size: 8.4pt; }
+
+  /* Cover */
+  .kicker { font-size: 8pt; letter-spacing: 0.6pt; color: var(--muted); margin-top: 6mm; }
+  .title { font-size: 24pt; line-height: 1.15; font-weight: 700; color: var(--accent); margin: 3mm 0 2mm; }
+  .subtitle { font-size: 12pt; color: var(--ink-2); margin: 0 0 4mm; }
+  .meta { display: grid; grid-template-columns: 28mm 1fr; row-gap: 1.2mm; font-size: 9pt; border-top: 0.7pt solid var(--accent); padding-top: 3mm; margin-bottom: 5mm; }
+  .meta span:nth-child(odd) { color: var(--muted); }
+  .answers { border: 0.6pt solid var(--line); border-radius: 5px; overflow: hidden; }
+  .answers .row { display: grid; grid-template-columns: 11mm 1fr; border-top: 0.6pt solid var(--line); }
+  .answers .row:first-child { border-top: 0; }
+  .answers .row > span:first-child { background: var(--tint); color: var(--accent); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .answers .row > span:last-child { padding: 1.7mm 3mm; }
+  .reply { margin-top: 5mm; }
+
+  /* Question pages */
+  section.sec { break-before: page; }
+  .qhead { display: flex; align-items: center; gap: 3mm; margin: 0 0 2.5mm; }
+  .qhead .n { min-width: 10mm; height: 8mm; padding: 0 2mm; border-radius: 4px; background: var(--accent); color: #fff; font-weight: 700; font-size: 11pt; display: flex; align-items: center; justify-content: center; }
+  .qhead h1 { font-size: 15pt; color: var(--accent); margin: 0; line-height: 1.2; }
+  .ask { font-size: 8.8pt; color: var(--ink-2); font-style: italic; border-left: 2px solid #cfcdc6; padding: 0.5mm 0 0.5mm 3mm; margin: 0 0 3mm; }
+  .ask b { font-style: normal; color: var(--ink-2); }
+  .short { background: var(--tint); border-left: 3px solid var(--accent); border-radius: 0 4px 4px 0; padding: 2.6mm 3.5mm; margin: 0 0 3.5mm; font-size: 10.2pt; }
+  .short p:last-child, .card p:last-child, .box p:last-child { margin-bottom: 0; }
+  .box { border: 0.6pt solid var(--line); border-radius: 5px; padding: 2.6mm 3.5mm; margin: 0 0 3mm; break-inside: avoid; }
+  .box.warn { background: #fffaf0; border-color: #f1e2b4; }
+  .box.change { border-color: #9fd3a5; background: #f4fbf4; }
+  .tag { display: inline-block; font-size: 7.6pt; font-weight: 700; border-radius: 8px; padding: 0 2mm; margin-right: 1.5mm; vertical-align: 0.3pt; }
+  .tag.c { background: #dff1df; color: #1d5e1d; }
+  .tag.f { background: var(--tint-warn); color: #5c4a12; }
+
+  figure { margin: 0 0 3.5mm; break-inside: avoid; }
+  figure img { width: 100%; display: block; border-radius: 4px; }
+  figure img.framed { border: 0.6pt solid var(--line); }
+  figcaption { font-size: 8pt; font-style: italic; color: var(--muted); margin-top: 1.2mm; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; align-items: start; }
+  .two.wide-left { grid-template-columns: 1.25fr 1fr; }
+  .two.fig-wide { grid-template-columns: 1.7fr 1fr; }
+  .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3.5mm; margin: 0 0 3.5mm; }
+  .card { border: 0.6pt solid var(--line); border-radius: 6px; padding: 3mm; background: #fff; break-inside: avoid; }
+  .card h3 { margin-top: 0; }
+  .card dl { margin: 0; font-size: 8.8pt; }
+  .card dt { color: var(--muted); font-size: 7.8pt; margin-top: 1.4mm; }
+  .card dd { margin: 0; }
+
+  table.t { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin: 0 0 3mm; break-inside: avoid; }
+  table.t th, table.t td { border: 0.5pt solid #cdcdcd; padding: 1.2mm 1.8mm; text-align: left; vertical-align: top; }
+  table.t th { background: #e3ebf5; font-weight: 700; }
+  table.t tr:nth-child(even) td { background: #fafaf8; }
+  table.t td.r, table.t th.r { text-align: right; white-space: nowrap; }
+  table.t .meter { margin-right: 1.5mm; }
+  .v { display: inline-block; padding: 0 1.8mm; border-radius: 7px; font-weight: 700; font-size: 8pt; white-space: nowrap; }
+  .v.win { background: var(--tint-good); color: #1d5e1d; }
+  .v.loss { background: var(--tint-bad); color: #8a1f1f; }
+  .v.unc { background: #efefec; color: #3f3f3c; }
+
+  /* The library-style summary card */
+  .libcard { border: 0.6pt solid var(--line); border-radius: 6px; padding: 3mm 3.5mm; background: #fff; break-inside: avoid; }
+  .libcard .h { font-weight: 700; font-size: 9.6pt; margin-bottom: 1.5mm; display: flex; align-items: center; gap: 2mm; }
+  .libcard .h .src { margin-left: auto; }
+  .libcard .stats { display: flex; gap: 2mm; margin-bottom: 1.5mm; }
+
+  /* Step flows */
+  .flow { display: flex; align-items: stretch; gap: 0; margin: 0 0 2mm; }
+  .flow .step { flex: 1; border: 0.6pt solid var(--line); border-radius: 6px; padding: 2.4mm; background: #fff; font-size: 8.4pt; line-height: 1.38; }
+  .flow .step .k { display: flex; align-items: center; gap: 1.6mm; font-weight: 700; font-size: 9pt; margin-bottom: 1mm; }
+  .flow .step .k i { font-style: normal; width: 5mm; height: 5mm; border-radius: 50%; background: var(--accent); color: #fff; font-size: 7.6pt; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .flow .step.send { border-color: var(--accent); background: var(--tint); }
+  .flow .arrow { width: 5mm; display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 700; flex: none; }
+  .loopback { font-size: 8.4pt; color: var(--accent); text-align: center; margin: -0.5mm 0 3mm; }
+
+  /* Bars */
+  .bars { display: grid; grid-template-columns: 52mm 1fr; row-gap: 2mm; column-gap: 3mm; align-items: center; font-size: 8.8pt; margin: 1mm 0 3mm; }
+  .bars .track { position: relative; height: 5mm; }
+  .bars .track i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 3px 3px 0; background: var(--series-1); }
+  .bars .track i.page { background: #8fb6e3; }
+  .bars .track span { position: absolute; top: 0.2mm; white-space: nowrap; font-weight: 700; }
+
+  .pitch { border: 1pt solid var(--accent); border-radius: 6px; padding: 3.5mm 4mm; margin: 0 0 3.5mm; text-align: center; break-inside: avoid; }
+  .pitch .en { font-size: 12pt; font-weight: 700; color: var(--accent); }
+  .pitch .es { font-size: 11pt; color: var(--ink-2); margin-top: 1mm; }
+  .promises { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin: 0 0 3mm; }
+  .promises .card { text-align: center; }
+  .promises .card b { display: block; font-size: 10.5pt; color: var(--accent); }
+
+  table.changes td:first-child { font-weight: 700; white-space: nowrap; }
+  table.changes tr.opt td { background: #fffaf0; }
+  .sources { font-size: 7.8pt; color: var(--ink-2); }
+  .sources li { margin: 0.4mm 0; }
+  .sources a { word-break: break-all; }
+</style>
+</head>
+<body>
+
+<!-- ======================= Cover ======================= -->
+<div class="kicker">ANSWERS TO YOUR QUESTIONS · PLAN v2.2 · NOTHING IS BUILT YET</div>
+<div class="title">Before You Decide:<br>your nine questions, answered</div>
+<div class="subtitle">Where the numbers come from, what is empty on launch day, and what I suggest changing</div>
+<div class="meta">
+  <span>Date</span><span>2026-10-15</span>
+  <span>Prepared for</span><span>Pipe199x</span>
+  <span>Prepared by</span><span>Claude Code (Claude Opus 5.5)</span>
+  <span>About</span><span>Plan v2.2 (<code>docs/plan/PLAN.pdf</code>) and the demo (<code>docs/plan/old/demo-xp/DEMO-XP.html</code>)</span>
+</div>
+
+<h2 style="margin-top: 0">The short answers</h2>
+<div class="answers">
+  <div class="row"><span>I</span><span><b>Yes.</b> A writer picks a genre, then the book's language, then the change they plan. No account.</span></div>
+  <div class="row"><span>II</span><span><b>Yes, at launch the library is empty.</b> It fills only with real tests that writers share. A group shows numbers after 5 results. The demo's numbers are simulated.</span></div>
+  <div class="row"><span>III</span><span>The three ad numbers come from the writer's <b>ad platform report</b> (Meta, Amazon Ads, BookBub, TikTok). Your "?" idea is good: each box gets one.</span></div>
+  <div class="row"><span>IV</span><span>The <b>sales page</b> is where people buy the book. It's optional, and only shows why ads are faster. I suggest folding it away.</span></div>
+  <div class="row"><span>V</span><span><b>Yes, the "compared with writers like you" line is hidden at launch.</b> It appears after 5 results, with plainer words.</span></div>
+  <div class="row"><span>VI</span><span>The <b>bookstore stays simulated forever</b>. It teaches A/B testing, feeds the platform with data, and checks our math.</span></div>
+  <div class="row"><span>VII</span><span><b>Real lessons in one line:</b> most changes are small, clear wins are rare, and early wins shrink. So test bold ideas and finish the test.</span></div>
+  <div class="row"><span>VIII</span><span><b>Marketplace experiments</b> are three tests of our simulated store, not writers' decisions. I suggest renaming it "Test store".</span></div>
+  <div class="row"><span>IX</span><span><b>The pitch:</b> "Share what you learned. Learn what others learned. Decide with data, not luck."</span></div>
+</div>
+<p class="reply"><b>What I need from you:</b> the last page lists 13 changes for plan v2.3 (C1 to C13). Tell me which ones to apply. Until then, nothing changes in the plan or the demo.</p>
+
+<!-- ======================= Three kinds of numbers + I ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">★</span><h1>First: three kinds of numbers</h1></div>
+  <p>Most of your questions come down to one thing: <b>where does this number come from?</b> The site has three kinds of numbers. On the real site, each one carries a badge, so nobody mixes them up (change C1).</p>
+  <div class="cards3">
+    <div class="card">
+      <h3><span data-src="shared"></span></h3>
+      <dl>
+        <dt>What</dt><dd>Real results of real ad tests. A writer chose to press Share.</dd>
+        <dt>Where you see it</dt><dd>"What worked" (the library), and the "compared with writers like you" lines.</dd>
+        <dt>On launch day</dt><dd><b>Empty.</b> It fills as writers share.</dd>
+        <dt>Rule</dt><dd>A group shows numbers only after 5 results.</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h3><span data-src="public"></span></h3>
+      <dl>
+        <dt>What</dt><dd>4,873 real A/B tests of news headlines, published as open data by Upworthy (2013–2015).</dd>
+        <dt>Where you see it</dt><dd>"Real lessons", and the tool's realistic expectations.</dd>
+        <dt>On launch day</dt><dd><b>Ready.</b> We analyze it in Phase 5.</dd>
+        <dt>Rule</dt><dd>News headlines, not books. The page says so.</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h3><span data-src="sim"></span></h3>
+      <dl>
+        <dt>What</dt><dd>Made up on purpose by our program: 70,000 fictional shoppers in a fictional store.</dd>
+        <dt>Where you see it</dt><dd>The test store ("Marketplace experiments") and the whole demo.</dd>
+        <dt>On launch day</dt><dd><b>Running</b>, every day.</dd>
+        <dt>Rule</dt><dd>Never mixed into the library (D26).</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="box warn"><p><b>In the demo you saw, everything is simulated, even the library.</b> The demo shows how the site will look after many writers have shared. On the real site, the library holds only real shared results.</p></div>
+
+  <div class="qhead" style="margin-top: 6mm"><span class="n">I</span><h1>Choosing who you are</h1></div>
+  <p class="ask"><b>You asked:</b> a user enters the page and selects the type of writer, then the language. Right?</p>
+  <div class="short"><p><b>Short answer: yes.</b> Three choices, and no account:</p>
+    <ol style="margin-bottom: 0">
+      <li>the genre: romance, fantasy, thriller, self-help, children's books… (about 10, plus "other");</li>
+      <li>the <b>book's</b> language: Spanish or English;</li>
+      <li>what the writer is about to change: cover, title, blurb, price display or bundle.</li>
+    </ol>
+  </div>
+  <ul>
+    <li><b>The book's language is not the website's language.</b> A Spanish-language writer can read the site in English, and the other way round (the ES · EN switch).</li>
+    <li>Nothing about the writer is saved. The three choices only filter the library.</li>
+  </ul>
+</section>
+
+<!-- ======================= II (1/3) ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">II</span><h1>Is the library empty at launch?</h1></div>
+  <p class="ask"><b>You asked:</b> when the page launches, "Worked clearly: x of x", "Made it worse: x of x", "Ideas that worked" and "What works best for romance writers in Spanish" won't exist, right? They need data from others.</p>
+  <div class="short"><p><b>Short answer: right.</b> On launch day nobody has shared anything yet, so those parts are empty. Each group (genre + book language + change) shows numbers only after <b>5 writers</b> have shared a test. Until then, the page says so honestly, and it never fills the gap with made-up numbers (D26).</p></div>
+  <div class="two">
+    <figure><img src="figs/library_launch.png" alt="Launch day"><figcaption>Launch day (proposed, C2): a "0 of 5" counter, "be one of the first", and real headline lessons meanwhile.</figcaption></figure>
+    <figure><img src="../old/v2.2/mockups/library.png" alt="Later"><figcaption>Later, after many writers share (the v2.2 mockup). The numbers here are examples.</figcaption></figure>
+  </div>
+  <h2>How it fills up</h2>
+  <table class="t">
+    <tr><th>When</th><th>Cover · romance · Spanish</th><th>What the writer sees</th></tr>
+    <tr><td>Launch day</td><td><span class="meter" data-n="0"></span> 0 of 5</td><td>"Not enough results yet: be one of the first." Plus lessons from real headline tests.</td></tr>
+    <tr><td>Some weeks later</td><td><span class="meter" data-n="3"></span> 3 of 5</td><td>The same message, with the counter moving. Each share counts.</td></tr>
+    <tr><td>When 5 are in</td><td><span class="meter" data-n="5"></span> 5 of 5</td><td>The numbers appear: worked clearly, made it worse, the typical change, the dots.</td></tr>
+  </table>
+  <ul>
+    <li>Popular groups (romance · Spanish · cover) fill first. Rare groups may stay empty for months. That's fine: we say so.</li>
+    <li>"Ideas that worked" and the "What works best" ranking need even more results, so they appear later (C3).</li>
+    <li><b>The rest of the tool works from day 1:</b> Plan a test, Read your results and Real lessons don't need the library.</li>
+  </ul>
+</section>
+
+<!-- ======================= II (2/3) ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">II</span><h1>Where do the library's numbers come from?</h1></div>
+  <p class="ask"><b>You asked:</b> where do you bring that data from? Was it already processed by A/B testing? How are you sure the ideas work? How will we do it in real life?</p>
+  <div class="short"><p><b>Short answer:</b> every number in the library comes from a <b>real A/B test that a writer ran with their own two ads</b>, and then chose to share. The library doesn't run tests. It counts finished tests.</p></div>
+  <h2>Real life, step by step</h2>
+  <div class="flow">
+    <div class="step"><div class="k"><i>1</i>Run two ads</div>With the ad platform's A/B test: same budget, one change.</div>
+    <div class="arrow">›</div>
+    <div class="step"><div class="k"><i>2</i>Type the numbers</div>Views and clicks for each ad, in "Read your results".</div>
+    <div class="arrow">›</div>
+    <div class="step"><div class="k"><i>3</i>Get a verdict</div>Use B, Keep A, Not sure yet… Worked out in the browser.</div>
+    <div class="arrow">›</div>
+    <div class="step send"><div class="k"><i>4</i>Press Share</div>Optional. Every field shown first. No names or titles.</div>
+    <div class="arrow">›</div>
+    <div class="step"><div class="k"><i>5</i>Nightly update</div>Checks, then grouping by genre, language and change.</div>
+  </div>
+  <p class="small muted">Only step 4 sends anything, to our free Cloudflare database. Steps 1 to 3 stay on the writer's computer. Databricks does step 5 each night, and the library shows the new result the next day.</p>
+
+  <h2>Yes: each result is already an A/B test</h2>
+  <p>Each dot in the library is one finished test: two ads, the same budget, one change. The tool already gave that writer a verdict. The library puts many tests side by side, like a test of tests. Here is a small example with six writers:</p>
+  <table class="t" id="example"></table>
+  <div class="two wide-left">
+    <div class="libcard" id="excard"></div>
+    <div class="small">
+      <p><b>Worked clearly</b> = ad B got more clicks, and the test says it's not luck (p below 0.05).</p>
+      <p><b>Made it worse</b> = ad B got fewer clicks, and it's not luck.</p>
+      <p><b>Unclear</b> = the test couldn't tell. That's common, and it's useful too.</p>
+      <p><b>Typical change</b> = the middle result. <b>Most between</b> = the middle half of the results.</p>
+      <p><b>Careful average</b> (behind the scenes) = when a group has few results, it's pulled toward the average of all writers, so one lucky test can't make a big claim.</p>
+    </div>
+  </div>
+  <div class="box" style="margin-top: 3mm"><p><b>How are we sure an idea works? We don't promise. We count.</b> "It worked for 2 of 6 writers like you" is a fact about past tests, not a promise about your book. That's why the library always ends with "test yours".</p></div>
+</section>
+
+<!-- ======================= II (3/3) ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">II</span><h1>What "worked" means, and what I will fix</h1></div>
+  <h2>What "worked" means</h2>
+  <p><b>More people clicked the ad, in a fair test.</b> It does not prove more sales. The tool already says "check your sales next month". I suggest the library card says it too, in one line (C4).</p>
+
+  <h2>"Ideas that worked": a problem I found</h2>
+  <p>Writers can tag a shared test with one idea from a fixed list, for example "photo cover instead of an illustration". There is no free text, so nothing personal can be typed. But the demo shows the ideas in a weak way:</p>
+  <div class="two">
+    <div class="box warn">
+      <p class="small"><span class="tag f">Today, in the demo</span></p>
+      <p>Characters on the cover instead of an object <b>(+40%)</b></p>
+      <p class="small muted">This +40% is <b>one single test</b>: the best test that used this idea. One lucky test is not evidence.</p>
+    </div>
+    <div class="box change">
+      <p class="small"><span class="tag c">Proposed (C3)</span></p>
+      <p>Characters instead of an object · <b>worked in 4 of 9 tests</b> · typical +12%</p>
+      <p class="small muted">An idea is listed only after 5 tests used it. We show how often it worked, not the best result. (Example numbers.)</p>
+    </div>
+  </div>
+  <p class="small muted">In the six-writer example on the previous page, no idea has 5 tests yet, so the card shows no ideas. This also replaces the plan's current rule (§3.12, "the most common idea tags among clear wins"), which favors ideas that many writers simply tried.</p>
+
+  <h2>Can someone lie?</h2>
+  <p>Yes, a person could type fake numbers, and we can't see their ad account. So we make cheating hard and limit the damage (D25):</p>
+  <ul>
+    <li>number checks: clicks can't be more than views, and both ads need similar views (a fair split);</li>
+    <li>at most 5 shares a day per visitor;</li>
+    <li>unusual results are flagged and left out;</li>
+    <li>middle values instead of averages, so one wild number can't move the result;</li>
+    <li>5 results before any number shows.</li>
+  </ul>
+
+  <h2>Another risk: writers may share mostly wins</h2>
+  <p>People like to share good news. If only wins get shared, the library looks too rosy. So the Share button appears for <b>every</b> verdict, with "a test that didn't work is just as useful", and we watch the share of wins over time. This is new risk R38 (C10).</p>
+  <p><b>Who shares first?</b> See IX: the "Founding writers" plan.</p>
+</section>
+
+<!-- ======================= III ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">III</span><h1>Where do the three ad numbers come from?</h1></div>
+  <p class="ask"><b>You asked:</b> "Views per day, per ad", "People who click (%)" and "Cost per 1,000 views": where do they come from? Only Meta, or other platforms like Amazon too? A "?" would be fine for writers who don't know.</p>
+  <div class="short"><p><b>Short answer:</b> from the writer's ad platform. Every big ad platform reports them, under different names; on some, you divide two numbers. Your "?" idea is good: each box gets a "?" that says where to look (C5).</p></div>
+  <table class="t">
+    <tr><th>Ad platform</th><th>Views per day, per ad</th><th>People who click (%)</th><th>Cost per 1,000 views</th></tr>
+    <tr><td><b>Meta Ads Manager</b><br><span class="small muted">Facebook, Instagram</span></td><td>"Impressions" ÷ days the ad ran</td><td>"CTR (link click-through rate)"</td><td>"CPM (cost per 1,000 impressions)"</td></tr>
+    <tr><td><b>Amazon Ads</b><br><span class="small muted">for KDP books</span></td><td>"Impressions" ÷ days</td><td>"Clicks" ÷ "Impressions" × 100</td><td>Spend ÷ "Impressions" × 1,000<br><span class="small muted">Amazon charges per click</span></td></tr>
+    <tr><td><b>BookBub Ads</b></td><td>"Impressions Served" ÷ days</td><td>"Click-through Rate (CTR)"</td><td>"Effective CPM (eCPM)"</td></tr>
+    <tr><td><b>TikTok Ads Manager</b></td><td>"Impressions" ÷ days</td><td>"CTR (Destination)"</td><td>"CPM"</td></tr>
+  </table>
+  <p class="small muted">Names checked on each platform's own help pages on 2026-10-15 (sources at the end). Amazon lets KDP authors advertise their books in 12 stores, including the US, Mexico and Spain, and they pay per click.</p>
+  <div class="two fig-wide">
+    <figure><img src="figs/plan_help.png" alt="Plan an ad test with help"><figcaption>Proposed: a "?" on each box (C5), and a full-week test (C12).</figcaption></figure>
+    <div>
+      <h3 style="margin-top: 0">Never ran ads?</h3>
+      <p>The boxes start with example numbers, clearly marked. After the first day of ads, the writer types their own. Later, when the library has results, it can suggest "writers like you get about 1.1% clicks", from the views and clicks they shared.</p>
+      <h3>Something I found while checking</h3>
+      <p>TikTok's help says to run a split test <b>for at least 7 days</b>. Ads behave differently on weekdays and weekends, but our tool says "about <span id="d30"></span> days".</p>
+      <p>I suggest: always run the full week, and spread the same budget over 7 days, about <span id="per7"></span> views a day per ad. The cost stays the same (C12).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= IV ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">IV</span><h1>"Your sales page"</h1></div>
+  <p class="ask"><b>You asked:</b> I don't know what "your sales page" is. Is it optional, for writers with their own web page instead of Amazon or Meta? Where does "on your sales page, the same test takes 9.8 months to 6.7 years" come from?</p>
+  <div class="short"><p><b>Short answer:</b> the sales page is <b>the page where people buy the book</b>: the book's Amazon page, the writer's own website, or a shop like Payhip or Hotmart. Yes, it's optional. It's there only to show why testing with ads is much faster.</p></div>
+  <div class="two wide-left">
+    <figure><img class="framed" src="shots/demo-plan.png" alt="The demo's Plan an ad test tab"><figcaption>The demo today: box 3 and the line you asked about.</figcaption></figure>
+    <div>
+      <h3 style="margin-top: 0">Where the numbers come from</h3>
+      <p>Box 3 starts with example numbers: <b>2,000 visitors a month</b>, <b>2 in 100 buy</b>, and a price of COP 24,900. Then it's the same math as section D of the plan:</p>
+      <ul>
+        <li>to prove <b>+30%</b> more sales, you need <b id="n30"></b> visitors per version, <span id="t30"></span> in total: <b id="m30"></b> at 2,000 a month;</li>
+        <li>to prove <b>+10%</b>, you need <b id="n10"></b> per version, <span id="t10"></span> in total: <span id="m10"></span>, or <b id="y10"></b>;</li>
+        <li>with ads, the same bold test (+30% more clicks) needs about <b id="ads30"></b>, because ads get thousands of views a day.</li>
+      </ul>
+      <p class="small">The line "If your sales grow 20%, that's COP 199,200 more a month" is 2,000 × 2% = 40 sales a month; 20% more is 8 sales × COP 24,900.</p>
+    </div>
+  </div>
+  <h2>The same test, three ways</h2>
+  <div class="bars" id="bars"></div>
+  <ul>
+    <li><b>A fair test needs two versions at the same time.</b> A book page shows one cover at a time. Changing the cover and comparing "before vs after" isn't fair, because the month, the season and your other ads change too.</li>
+    <li>Amazon's own A/B tool ("Manage Your Experiments") is for sellers with a Professional selling account and a brand in Amazon Brand Registry. Its page doesn't mention books or KDP.</li>
+  </ul>
+  <div class="box change"><p><span class="tag c">Proposed (C6)</span> Move box 3 out of the main form, into a folded "Why not test on my book's page?" box. Curious writers open it and can change the numbers. Everyone else sees only the ad test.</p></div>
+</section>
+
+<!-- ======================= V ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">V</span><h1>The "compared with writers like you" line</h1></div>
+  <p class="ask"><b>You asked:</b> "Compared with 26 cover tests by writers like you, your +54% beats 100% of them" won't exist at launch either, right? No writers will have shared yet.</p>
+  <div class="short"><p><b>Short answer: right.</b> This line needs results from writers like you, so it's hidden at launch. It appears when the group has 5 results (C7).</p></div>
+  <div class="two">
+    <div class="box">
+      <p class="small"><span class="tag f">Launch day</span> <span data-src="shared"></span></p>
+      <p>Not enough cover tests from writers like you yet (0 of 5). Share yours to start the library.</p>
+    </div>
+    <div class="box">
+      <p class="small"><span class="tag c">Later</span> <span data-src="shared"></span></p>
+      <p id="cmpLater"></p>
+    </div>
+  </div>
+  <ul>
+    <li><b>Wording fix:</b> "beats 100% of them" sounds like a contest, and "100%" looks like a promise. A plain count is clearer: "higher than all 26", or "higher than 24 of the 26".</li>
+    <li>Your +54% came from typing your own numbers in the demo. With María's example numbers, the result is +30%.</li>
+  </ul>
+  <figure style="width: 72%"><img class="framed" src="shots/demo-read.png" alt="The demo's Read your results tab"><figcaption>The demo today: the line sits just above the Share button.</figcaption></figure>
+</section>
+
+<!-- ======================= VI ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">VI</span><h1>The bookstore</h1></div>
+  <p class="ask"><b>You asked:</b> I like the bookstore, because it shows exactly what A/B testing is. How will it look in the final product? Since it's simulated, what is it for? Is it there to show A/B testing behind the scenes, as if a person were browsing?</p>
+  <div class="short"><p><b>Short answer: yes, that's one of its jobs, and it stays simulated forever.</b> In the final product, the 70,000 shoppers are a <b>program</b>, not people on a web page. The demo window shows what that program does, one shopper at a time. No real books are sold and no real money moves.</p></div>
+  <figure><img class="framed" src="shots/demo-store-book.png" alt="The demo's bookstore"><figcaption>The demo's bookstore: this shopper got cover B, bundle banner B and checkout A. Every click becomes a Kafka event (bottom line).</figcaption></figure>
+  <div class="two wide-left">
+    <div>
+      <h3 style="margin-top: 0">Its three jobs</h3>
+      <ol>
+        <li><b>It shows an A/B test from the inside.</b> Two shoppers see two versions. "Why these?" shows the coin flip: a code made from the shopper's ID decides A or B, and the same shopper always gets the same version.</li>
+        <li><b>It feeds the platform.</b> Real writers share a few results a week. That's far too little to run and prove Kafka, Databricks and the daily pipeline. The store makes thousands of events every day.</li>
+        <li><b>It's an answer key.</b> We planted the true effects, for example "the bundle banner really helps". If the statistics find them, and don't invent effects that aren't there, we know the math works before writers rely on it.</li>
+      </ol>
+    </div>
+    <figure><img class="framed" src="shots/demo-why-dialog.png" alt="Why these versions"><figcaption>"Why these?": how each shopper gets A or B.</figcaption></figure>
+  </div>
+  <div class="box change"><p><span class="tag c">Option (C13), your choice</span> Today the real site has no store page: the store is only a program. You liked this window, so I suggest a page called <b>"See an A/B test from inside"</b>, under "Behind the scenes". A visitor picks a shopper, sees which versions they got and why, and watches each click become an event. Clearly labeled "Simulated". About +6 h (4–8). I recommend yes: it explains A/B testing better than any text.</p></div>
+</section>
+
+<!-- ======================= VII ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">VII</span><h1>What "Real lessons" concludes</h1></div>
+  <p class="ask"><b>You asked:</b> I don't get the conclusion of "Real Lessons". Please clarify.</p>
+  <div class="short"><p><b>In one line:</b> most changes make only a small difference, clear winners are rare, and early winners look bigger than they are. <b>So test bold ideas, run the test to the planned end, and expect a bit less later.</b></p></div>
+  <div class="two">
+    <figure><img class="framed" src="shots/demo-lessons.png" alt="The demo's Real Lessons"><figcaption>The demo today: three numbers, but no conclusion.</figcaption></figure>
+    <figure><img src="figs/lessons_plain.png" alt="Real lessons as three lessons"><figcaption>Proposed (C8): the conclusion first, then three lessons, each with "for you".</figcaption></figure>
+  </div>
+  <table class="t">
+    <tr><th>Lesson</th><th>What the data shows (placeholder)</th><th>What it means for a writer</th></tr>
+    <tr><td>1 · Most changes are small</td><td>Most headline changes moved clicks by less than 10%.</td><td>Test a bold change, not a tiny tweak. Small differences need weeks of views.</td></tr>
+    <tr><td>2 · Clear winners are rare</td><td>About 1 test in 5 had a clear winner.</td><td>"No clear winner" is a normal result, not a failure.</td></tr>
+    <tr><td>3 · Winners shrink later</td><td>A winner's lift was about 40% smaller when tested again (the "winner's curse").</td><td>Don't stop early. If you see +30%, expect less later.</td></tr>
+  </table>
+  <div class="box warn"><p><b>Honest note:</b> the demo's numbers (about 1 in 5, −40%, ~30,000) are <b>placeholders</b>. We compute the real ones in Phase 5 from the Upworthy data: 4,873 tests of news headlines, 2013–2015. They are about headlines, not book sales, so the tool uses them only as a starting expectation. If Phase 5 finds different numbers, the lessons change with them.</p></div>
+  <p>Why it matters: these lessons are the reason the tool says "test a bold change" and "don't stop early".</p>
+</section>
+
+<!-- ======================= VIII ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">VIII</span><h1>"Experimentos del marketplace"</h1></div>
+  <p class="ask"><b>You asked:</b> where did that data come from? It's useful, but it may confuse people, because each decision is different. Or does it show the decision most ebooks made, based on A/B tests?</p>
+  <div class="short"><p><b>Short answer:</b> it comes from our <b>simulated store</b>. It is not a vote of writers or ebooks. It's three separate tests that the store ran on its own pages, and each test has its own decision.</p></div>
+  <div class="two">
+    <figure><img class="framed" src="shots/demo-experiments.png" alt="The demo's Marketplace Experiments"><figcaption>The demo today: correct, but written for data people.</figcaption></figure>
+    <figure><img src="figs/store_plain.png" alt="Test store"><figcaption>Proposed (C9): "Test store", one plain sentence per decision, "not advice for your book".</figcaption></figure>
+  </div>
+  <h2>The three decisions, in plain words</h2>
+  <ul>
+    <li><b>Wallet-first checkout: keep it.</b> More shoppers paid within 30 minutes, and nothing got worse.</li>
+    <li><b>New cover + subtitle: don't keep it.</b> More shoppers bought, but refunds rose above the limit set before the test.</li>
+    <li><b>3-book bundle banner: keep it.</b> More money per visitor, and refunds stayed normal.</li>
+    <li>The two small rows are <b>checks on the checks</b>: two groups shown the same page must show no difference (they don't), and a split we broke on purpose must be caught (it is).</li>
+  </ul>
+  <p><b>Why the decisions differ:</b> each test changes something different and is judged by its own rules, written before it starts. A big store tests many ideas; some win, some lose.</p>
+  <p><b>Why a writer could be confused:</b> this page says "new cover: don't keep it", while the library may say "covers often help". They answer different questions: one fictional store versus many real writers. Hence C9: rename it, place it under "Behind the scenes", and say "not advice for your book".</p>
+</section>
+
+<!-- ======================= IX ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">IX</span><h1>How do we sell it?</h1></div>
+  <p class="ask"><b>You asked:</b> how do we sell this project? "Using and sharing your experience, you could help, and make data-driven decisions about how your ebook performs"?</p>
+  <div class="short"><p><b>Short answer:</b> your line has the right idea. The tool is free, so "selling" means two things: getting writers to use it, and getting them to share. Here is a shorter version of your line:</p></div>
+  <div class="pitch">
+    <div class="en">Share what you learned. Learn what others learned. Decide with data, not luck.</div>
+    <div class="es">Comparte lo que aprendiste. Aprende de los demás. Decide con datos, no con suerte.</div>
+  </div>
+  <div class="flow">
+    <div class="step"><div class="k"><i>1</i>Check what worked</div>Before deciding, see results from writers like you.</div>
+    <div class="arrow">›</div>
+    <div class="step"><div class="k"><i>2</i>Plan the test</div>How many days, and what it costs.</div>
+    <div class="arrow">›</div>
+    <div class="step"><div class="k"><i>3</i>Read the result</div>A plain verdict: use B, keep A, or not sure yet.</div>
+    <div class="arrow">›</div>
+    <div class="step send"><div class="k"><i>4</i>Share it</div>Anonymous, one click. The library grows.</div>
+  </div>
+  <p class="loopback">↺ The next writer starts at step 1 with one more result. That's the loop that brings writers back.</p>
+  <div class="promises">
+    <div class="card"><b>Free</b>No account, no ads, no payments. It costs $0 to run.</div>
+    <div class="card"><b>Private</b>Nothing leaves your browser unless you press Share.</div>
+    <div class="card"><b>Honest</b>"Not enough results yet" instead of guessing.</div>
+  </div>
+  <div class="two">
+    <div>
+      <h3 style="margin-top: 0">Who first, and where</h3>
+      <ul>
+        <li><b>Spanish-language indie writers who already run ads.</b> They have the numbers and the questions.</li>
+        <li>Where they meet: writer groups on Facebook and WhatsApp, BookTok and Bookstagram, writing forums, book fairs.</li>
+        <li>On day 1 they already get value: Plan a test, Read your results and Real lessons. The library grows with them.</li>
+      </ul>
+      <h3>How we know it works</h3>
+      <p>Shared results per week, and how many groups reached 5. That's all we can count, because the site has no analytics, by design.</p>
+    </div>
+    <div>
+      <h3 style="margin-top: 0">"Founding writers" (C11)</h3>
+      <ul>
+        <li>Ask writers to type in A/B tests they already ran. Ad platforms keep past reports, so one writer can share several tests in a few minutes.</li>
+        <li>First goal: 5 results in the most common groups, for example romance · Spanish · cover, to unlock the first numbers.</li>
+        <li>A public counter on the home page: "N results shared so far".</li>
+      </ul>
+      <h3>What we never promise</h3>
+      <p>More sales. We promise better decisions and fewer guesses.</p>
+      <h3>For LinkedIn</h3>
+      <p class="small">"I built a free tool that helps indie writers decide with data, not luck. Behind one simple page: Kafka, a Databricks lakehouse and tested statistics, at $0."</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= Changes ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">✓</span><h1>Changes I suggest for plan v2.3</h1></div>
+  <p>C1 to C12 are clarity fixes. I recommend all of them. C13 is optional.</p>
+  <table class="t changes">
+    <tr><th>#</th><th>Change</th><th>From</th><th class="r">Effort</th></tr>
+    <tr><td>C1</td><td>Badges for the three kinds of numbers: "Shared by writers", "Real public tests", "Simulated". On every page and number block.</td><td>I, VI, VIII</td><td class="r">1 h</td></tr>
+    <tr><td>C2</td><td>The library's launch-day state: an "x of 5 results needed" counter per group, "be one of the first", and real headline lessons meanwhile. The ranking waits for 5 results per change.</td><td>II</td><td class="r">1 h</td></tr>
+    <tr><td>C3</td><td>An idea is listed only after 5 tests used it, as "worked in W of N · typical +X%". Never one test's result. Replaces the rule in §3.12.</td><td>II</td><td class="r">1 h</td></tr>
+    <tr><td>C4</td><td>The library card says what "worked" means: more people clicked the ad, in a fair test. Not sales.</td><td>II</td><td class="r">0.25 h</td></tr>
+    <tr><td>C5</td><td>A "?" on each ad box: where to find the number on Meta, Amazon Ads, BookBub and TikTok, and what to do if you never ran ads.</td><td>III</td><td class="r">1.5 h</td></tr>
+    <tr><td>C6</td><td>The sales page leaves the main form, into a folded "Why not test on my book's page?" box.</td><td>IV</td><td class="r">0.5 h</td></tr>
+    <tr><td>C7</td><td>The "compared with writers like you" line needs 5 results, and uses plain words: "higher than 24 of the 26".</td><td>V</td><td class="r">0.25 h</td></tr>
+    <tr><td>C8</td><td>Real lessons becomes three lessons, the conclusion first, each with "what this means for you".</td><td>VII</td><td class="r">0.5 h</td></tr>
+    <tr><td>C9</td><td>"Marketplace experiments" becomes "Test store", under "Behind the scenes": one plain sentence per decision, and "not advice for your book".</td><td>VIII</td><td class="r">0.5 h</td></tr>
+    <tr><td>C10</td><td>New risk R38, writers may share mostly wins: Share is offered for every verdict, and we watch the share of wins.</td><td>II</td><td class="r">0.25 h</td></tr>
+    <tr><td>C11</td><td>The "Founding writers" launch plan, plus a public counter of shared results.</td><td>IX</td><td class="r">0.5 h</td></tr>
+    <tr><td>C12</td><td>Run every ad test for at least 7 days (a full week), with the same budget spread over the week. The answer, the checklist and the library advice say so.</td><td>III</td><td class="r">0.25 h</td></tr>
+    <tr class="opt"><td>C13</td><td><b>Optional:</b> a "See an A/B test from inside" page on the real site, made from the demo's bookstore. Labeled "Simulated".</td><td>VI</td><td class="r">6 h (4–8)</td></tr>
+  </table>
+  <div class="box">
+    <p><b>Effort.</b> C1 to C12 add about <b>+7.5 h (5–10)</b>. The plan grows from about 146 h to about <b>154 h (128–178)</b>, still about 8 weeks at 20 h a week. C13 adds about +6 h (4–8) more, for about <b>160 h (132–186)</b>, still about 8 weeks.</p>
+  </div>
+  <div class="short"><p><b>What to reply:</b> for example "apply all", or "apply C1–C12, skip C13", or any other change. Then I'll update the plan to v2.3, along with its mockups and the demo, render them, and stop for your review. Nothing gets built until you say "start Phase 0".</p></div>
+
+  <h2>Sources (checked 2026-10-15)</h2>
+  <ul class="sources">
+    <li>Meta Business Help Center: <a href="https://www.facebook.com/business/help/675615482516035">Impressions</a> · <a href="https://en-gb.facebook.com/business/help/877711998984611">CTR (link click-through rate)</a> · <a href="https://www.facebook.com/business/help/753932008002620">CPM (cost per 1,000 impressions)</a> · <a href="https://www.facebook.com/business/help/1738164643098669">About A/B testing</a></li>
+    <li>Amazon: <a href="https://kdp.amazon.com/en_US/help/topic/G201499010">Advertising for KDP books</a> (who can advertise, cost per click, 12 stores) · <a href="https://advertising.amazon.com/library/guides/book-advertising-reporting">Reports for book advertising</a> (impressions, clicks, spend) · <a href="https://sell.amazon.com/tools/manage-your-experiments">Manage Your Experiments</a> (Professional selling account and Brand Registry)</li>
+    <li>BookBub: <a href="https://insights.bookbub.com/bookbub-ads-understanding-campaign-results/">BookBub Ads 101: Understanding Campaign Results</a> (updated 2024-01-11)</li>
+    <li>TikTok Ads Manager: <a href="https://ads.tiktok.com/help/article/tiktok-ads-manager-glossary-terms">Glossary</a> (Impressions, CPM) · <a href="https://ads.tiktok.com/help/article/about-updates-to-click-and-conversion-rate-metrics">Click metric updates</a> (CTR (Destination)) · <a href="https://ads.tiktok.com/help/article/split-test-best-practices?lang=en">Split Test Best Practices</a> (at least 7 days, at most 30)</li>
+    <li>Upworthy Research Archive (CC BY 4.0): <a href="https://upworthy.natematias.com/">upworthy.natematias.com</a></li>
+  </ul>
+</section>
+
+<script src="../render/abstats.js"></script>
+<script src="figs/answers-figs.js"></script>
+<script>
+(() => {
+  const S = ABStats;
+  const nf = (n) => Math.round(n).toLocaleString("en-US");
+  const pct = (x) => `${x >= 0 ? "+" : "−"}${Math.abs(Math.round(x * 100))}%`;
+  const set = (id, text) => { document.getElementById(id).textContent = text; };
+
+  // II: six writers' cover tests (example numbers), read with the same z-test as the tool.
+  const tests = [
+    { a: [20000, 240], b: [20000, 312], idea: "Characters" },
+    { a: [8000, 96], b: [8000, 104], idea: "Bigger title" },
+    { a: [15000, 150], b: [15000, 110], idea: "Photo cover" },
+    { a: [12000, 180], b: [12000, 234], idea: "Characters" },
+    { a: [6000, 60], b: [6000, 66], idea: "none" },
+    { a: [10000, 110], b: [10000, 104], idea: "Bigger title" },
+  ].map((t) => {
+    const z = S.zTest(t.a[1], t.a[0], t.b[1], t.b[0]);
+    const lift = t.b[1] / t.b[0] / (t.a[1] / t.a[0]) - 1;
+    const kind = z.p < 0.05 ? (z.diff > 0 ? "win" : "loss") : "unc";
+    return { ...t, z, lift, kind };
+  });
+  const label = { win: "Worked clearly", loss: "Made it worse", unc: "Unclear" };
+  document.getElementById("example").innerHTML =
+    `<tr><th>Writer</th><th class="r">Ad A views</th><th class="r">Ad A clicks</th><th class="r">Ad B views</th><th class="r">Ad B clicks</th><th class="r">Change in clicks</th><th class="r">p</th><th>Verdict</th><th style="width: 34mm">Idea (optional)</th></tr>` +
+    tests.map((t, i) => `<tr><td>${i + 1}</td><td class="r num">${nf(t.a[0])}</td><td class="r num">${nf(t.a[1])}</td><td class="r num">${nf(t.b[0])}</td><td class="r num">${nf(t.b[1])}</td>` +
+      `<td class="r num">${pct(t.lift)}</td><td class="r num">${t.z.p < 0.001 ? "< 0.001" : t.z.p.toFixed(3)}</td><td><span class="v ${t.kind}">${label[t.kind]}</span></td><td class="small">${t.idea}</td></tr>`).join("");
+
+  const quantile = (sorted, q) => {
+    const pos = (sorted.length - 1) * q, lo = Math.floor(pos), hi = Math.ceil(pos);
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+  };
+  const lifts = tests.map((t) => t.lift).sort((x, y) => x - y);
+  const wins = tests.filter((t) => t.kind === "win").length, losses = tests.filter((t) => t.kind === "loss").length;
+  const ideaCounts = {};
+  tests.forEach((t) => { if (t.idea !== "none") ideaCounts[t.idea] = (ideaCounts[t.idea] || 0) + 1; });
+  const ideasReady = Object.values(ideaCounts).filter((n) => n >= 5).length;
+  document.getElementById("excard").innerHTML =
+    `<div class="h">Cover changes · romance in Spanish · ${tests.length} shared tests <span data-src="shared"></span></div>` +
+    `<div class="stats"><span class="v win">Worked clearly: ${wins} of ${tests.length}</span><span class="v loss">Made it worse: ${losses} of ${tests.length}</span></div>` +
+    `<p>Typical change: <b>${pct(quantile(lifts, 0.5))} clicks</b>, most between ${pct(quantile(lifts, 0.25))} and ${pct(quantile(lifts, 0.75))}.</p>` +
+    `<p class="small muted">Ideas that worked: ${ideasReady ? "" : "none yet. Each idea needs 5 tests, and the most-used one has " + Math.max(...Object.values(ideaCounts)) + "."}</p>`;
+
+  // III and IV: the same sample-size math as the tool (5,000 views a day per ad, 1.2% click; 2,000 visitors a month, 2% buy).
+  const n30ads = Math.ceil(S.nPerArm(0.012, 0.3));
+  const adsDays = Math.ceil(n30ads / 5000);
+  set("d30", String(adsDays));
+  set("per7", nf(Math.round(n30ads / 7 / 100) * 100));
+  const n30 = Math.ceil(S.nPerArm(0.02, 0.3)), n10 = Math.ceil(S.nPerArm(0.02, 0.1));
+  const m30 = S.monthsNeeded(2000, 0.02, 0.3), m10 = S.monthsNeeded(2000, 0.02, 0.1);
+  set("n30", nf(n30)); set("t30", nf(2 * n30)); set("m30", `${m30.toFixed(1)} months`);
+  set("n10", nf(n10)); set("t10", nf(2 * n10)); set("m10", `${m10.toFixed(1)} months`); set("y10", `${(m10 / 12).toFixed(1)} years`);
+  set("ads30", `${adsDays} days`);
+
+  const DAYS_PER_MONTH = 30.4375;
+  const rows = [
+    ["Ads, bold change (+30% clicks)", adsDays, `${adsDays} days`, ""],
+    ["Sales page, bold change (+30%)", m30 * DAYS_PER_MONTH, `${m30.toFixed(1)} months (about ${nf(m30 * DAYS_PER_MONTH)} days)`, "page"],
+    ["Sales page, small change (+10%)", m10 * DAYS_PER_MONTH, `${(m10 / 12).toFixed(1)} years (about ${nf(m10 * DAYS_PER_MONTH)} days)`, "page"],
+  ];
+  const max = Math.max(...rows.map((r) => r[1]));
+  document.getElementById("bars").innerHTML = rows.map(([name, d, text, cls]) => {
+    const w = Math.max(0.6, (d / max) * 100);
+    const inside = w > 55;
+    return `<span>${name}</span><span class="track"><i class="${cls}" style="width:${w.toFixed(2)}%"></i>` +
+      `<span style="${inside ? `right:${(100 - w + 1.5).toFixed(2)}%; color:#fff` : `left:calc(${w.toFixed(2)}% + 2mm)`}">${text}</span></span>`;
+  }).join("");
+
+  // V: the demo's 26 cover tests for romance · Spanish (same numbers as old/mockups-v2.3/library.html).
+  const cell = [-0.039, -0.005, -0.15, 0.221, -0.242, 0.091, 0.18, -0.056, 0.387, 0.401, 0.027, -0.019, 0.281,
+    0.092, 0.206, 0.209, 0.108, 0.122, 0.273, 0.257, 0.158, -0.109, -0.06, 0.056, 0.046, 0.01];
+  const mine = 312 / 240 - 1;
+  const below = cell.filter((x) => x < mine).length;
+  set("cmpLater", `Your ${pct(mine)} is higher than ${below} of the ${cell.length} cover tests shared by writers like you.`);
+
+  AnswersFigs.decorate();
+})();
+</script>
+</body>
+</html>

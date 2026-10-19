@@ -1,0 +1,23 @@
+/* Shared look for the lifesaver answer's diagrams (rendered by tools/render_html.cjs). Same palette as the prototype. */
+:root {
+  --paper: #f3f5f9;
+  --surface: #ffffff;
+  --sunk: #e9edf4;
+  --ink: #131726;
+  --ink-2: #454b5e;
+  --muted: #646a7e;
+  --line: #d8dde8;
+  --accent: #243f9e;
+  --a: #2a6fc9;
+  --b: #d9561f;
+  --good: #11804a;
+  --bad: #b8352a;
+  --warn: #8a5d00;
+  --highlight: #ffe066;
+  --display: "Literata", "Noto Serif Display", "Noto Serif", Georgia, serif;
+  --body: "Noto Sans", "DejaVu Sans", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.4 var(--body); overflow: hidden; }
+.num { font-variant-numeric: tabular-nums; }

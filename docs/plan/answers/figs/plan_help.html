@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup: Plan an ad test, with help on each number</title>
+<link rel="stylesheet" href="../../old/mockups-v2.3/mockup.css">
+<link rel="stylesheet" href="answers-figs.css">
+<style>
+  main { gap: 12px; }
+  .inputs { width: 322px; flex: none; padding: 8px 11px; }
+  .inputs h2 { font-size: 12.5px; margin: 0 0 5px; }
+  .changes { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 7px; }
+  .opt { padding: 1px 6px; border: 1px solid #cfcdc6; border-radius: 10px; font-size: 10.5px; background: var(--surface); }
+  .opt.on { border-color: var(--accent); background: #e4edf7; font-weight: 600; }
+  .label { display: flex; align-items: center; margin-bottom: 2px; }
+  .label .opt-note { margin-left: 5px; color: var(--muted); }
+  .field { height: 23px; line-height: 21px; font-size: 12.5px; margin-bottom: 5px; }
+  .help { border: 1px solid #b9cde3; background: #f3f7fc; border-radius: 7px; padding: 5px 8px; margin: -1px 0 6px; font-size: 10.5px; }
+  .help .t { font-weight: 600; font-size: 11px; margin-bottom: 2px; }
+  .help .row { display: grid; grid-template-columns: 116px 1fr; gap: 6px; line-height: 1.45; }
+  .help .row span:first-child { color: var(--ink-2); }
+  .help .row b { font-weight: 600; }
+  .help .foot { margin-top: 3px; color: var(--ink-2); }
+  .fold { font-size: 11.5px; color: var(--accent); font-weight: 600; }
+  .out { flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+  .answer { border: 1px solid #9fd3a5; background: #eff8ef; border-radius: 8px; padding: 8px 11px; }
+  .answer h1 { display: flex; align-items: center; gap: 7px; font-size: 16px; margin: 0 0 4px; }
+  .answer h1 svg { width: 16px; height: 16px; }
+  .answer p { margin: 2px 0; font-size: 12px; line-height: 1.4; }
+  .answer .big { font-size: 13px; font-weight: 600; }
+  .answer .muted { color: var(--ink-2); font-size: 11.5px; }
+  .check { margin: 0; padding-left: 16px; font-size: 11.5px; color: var(--ink-2); }
+  .check li { margin: 1px 0; }
+  .folded { border: 1px solid var(--line); border-radius: 7px; background: var(--surface); padding: 6px 10px; font-size: 11.5px; }
+  .folded b { color: var(--accent); }
+  .folded p { margin: 2px 0 0; color: var(--ink-2); }
+</style>
+</head>
+<body data-render="720x450@3">
+<div class="window">
+  <div class="chrome"><i></i><i></i><i></i><div class="url">pipe199x.github.io/ebook-ab-platform/#/plan</div><div class="ribbon">MOCKUP · example numbers</div></div>
+  <div class="site"><b>Before You Decide</b><span>What worked</span><span class="on">Plan a test</span><span>Your results</span><span>Real lessons</span><span>Test store</span><span class="lang">ES · <strong>EN</strong></span></div>
+  <div class="banner">Example: María, a romance writer · example numbers · the tool runs in your browser and sends nothing</div>
+  <main>
+    <div class="card inputs">
+      <h2>What do you want to change?</h2>
+      <div class="changes"><span class="opt on">Cover</span><span class="opt">Title</span><span class="opt">Blurb</span><span class="opt">Price display</span><span class="opt">Bundle</span></div>
+      <div class="label">Views per day, per ad<span class="q">?</span></div><div class="field num">5,000</div>
+      <div class="label">People who click (%)<span class="q open">?</span></div><div class="field num">1.2 <span>%</span></div>
+      <div class="help">
+        <div class="t">Where do I find this?</div>
+        <div class="row"><span>Meta Ads Manager</span><b>CTR (link click-through rate)</b></div>
+        <div class="row"><span>TikTok Ads Manager</span><b>CTR (Destination)</b></div>
+        <div class="row"><span>BookBub Ads</span><b>Click-through Rate (CTR)</b></div>
+        <div class="row"><span>Amazon Ads</span><b>Clicks ÷ Impressions × 100</b></div>
+        <div class="foot">Never ran ads? Keep the example until your first day of ads.</div>
+      </div>
+      <div class="label">Cost per 1,000 views<span class="q">?</span><span class="opt-note">optional</span></div><div class="field num"><span>COP</span> 8,000</div>
+    </div>
+    <div class="out">
+      <div class="answer">
+        <h1><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="var(--good)"/><path d="M3.3 6.2l1.8 1.8 3.6-3.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Test the cover in ads</h1>
+        <p class="big">Run both ads for 7 days, a full week.</p>
+        <p id="math"></p>
+        <p id="spread"></p>
+        <p class="muted" id="money"></p>
+      </div>
+      <ul class="check">
+        <li>Change only the cover: same text, audience and budget.</li>
+        <li>Use your ad platform's A/B test, and pick the end day before you start.</li>
+      </ul>
+      <div class="folded"><b>▸ Why not test on my book's page?</b><p id="page"></p></div>
+    </div>
+  </main>
+</div>
+<script src="../../render/abstats.js"></script>
+<script>
+(() => {
+  const views = 5000, ctr = 0.012, cpm = 8000;
+  const n = Math.ceil(ABStats.nPerArm(ctr, 0.3));
+  const nf = (x) => x.toLocaleString("en-US");
+  document.getElementById("math").textContent =
+    `The math needs about ${Math.ceil(n / views)} days for a bold change (+30% more clicks). A full week also covers weekdays and the weekend.`;
+  document.getElementById("spread").textContent = `Same budget, spread over the week: about ${nf(Math.round(n / 7 / 100) * 100)} views a day per ad.`;
+  document.getElementById("money").textContent = `Ad budget for the test: about COP ${nf(Math.round((2 * n * cpm) / 1000 / 1000) * 1000)}.`;
+  document.getElementById("page").textContent =
+    `Short answer: too few visitors. At 2,000 a month, the same test takes ${ABStats.monthsNeeded(2000, 0.02, 0.3).toFixed(1)} months or more.`;
+})();
+</script>
+</body>
+</html>

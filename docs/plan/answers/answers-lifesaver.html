@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en" data-header="ebook-ab-platform · Can it be a lifesaver? · 2026-10-16">
+<head>
+<meta charset="utf-8">
+<title>Can it be a lifesaver?</title>
+<!-- Printed to LIFESAVER.pdf by tools/render_answers.sh lifesaver. The screens are the prototype's own (tools/check_demo.cjs).
+     The prototype it describes is now the demo, docs/plan/DEMO.html. -->
+<style>
+  :root {
+    --ink: #0b0b0b; --ink-2: #52514e; --muted: #696969; --line: #d9d8d2;
+    --accent: #243f9e; --tint: #eef1fb; --a: #2a6fc9; --b: #d9561f;
+    --good: #11804a; --critical: #b8352a; --warning: #fab219;
+    --tint-good: #e7f5ec; --tint-bad: #fbe9e7; --tint-warn: #fff4dc;
+  }
+  @page { size: A4; margin: 19mm 16mm 17mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; }
+  body { font-family: "Noto Sans", "DejaVu Sans", sans-serif; font-size: 9.6pt; line-height: 1.45; color: var(--ink); }
+  p { margin: 0 0 2.2mm; }
+  ul, ol { margin: 0 0 2.2mm; padding-left: 5mm; }
+  li { margin: 0.6mm 0; }
+  b, strong { font-weight: 700; }
+  a { color: #1a5fb4; text-decoration: none; }
+  code { font-family: "Noto Sans Mono", "DejaVu Sans Mono", monospace; font-size: 8.4pt; }
+  h2 { font-size: 11pt; color: var(--accent); margin: 4.5mm 0 1.8mm; break-after: avoid; }
+  h3 { font-size: 9.8pt; margin: 3mm 0 1.2mm; break-after: avoid; }
+  .num { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--ink-2); }
+  .small { font-size: 8.4pt; }
+
+  /* Cover */
+  .kicker { font-size: 8pt; letter-spacing: 0.6pt; color: var(--muted); margin-top: 6mm; }
+  .title { font-family: "Noto Serif Display", "Noto Serif", Georgia, serif; font-size: 30pt; line-height: 1.1; font-weight: 700; color: var(--accent); margin: 3mm 0 2mm; }
+  .subtitle { font-size: 12pt; color: var(--ink-2); margin: 0 0 4mm; }
+  .meta { display: grid; grid-template-columns: 28mm 1fr; row-gap: 1.2mm; font-size: 9pt; border-top: 0.7pt solid var(--accent); padding-top: 3mm; margin-bottom: 5mm; }
+  .meta span:nth-child(odd) { color: var(--muted); }
+  .answers { border: 0.6pt solid var(--line); border-radius: 5px; overflow: hidden; }
+  .answers .row { display: grid; grid-template-columns: 30mm 1fr; border-top: 0.6pt solid var(--line); }
+  .answers .row:first-child { border-top: 0; }
+  .answers .row > span:first-child { background: var(--tint); color: var(--accent); font-weight: 700; display: flex; align-items: center; padding: 1.7mm 3mm; }
+  .answers .row > span:last-child { padding: 1.7mm 3mm; }
+  .formula { display: flex; flex-wrap: wrap; align-items: center; gap: 1.6mm; margin: 4mm 0 0; font-size: 9.4pt; }
+  .formula span { border: 0.7pt solid var(--accent); border-radius: 12px; padding: 0.8mm 3mm; background: #fff; }
+  .formula i { font-style: normal; color: var(--accent); font-weight: 700; }
+  .formula b { background: var(--accent); color: #fff; border-radius: 12px; padding: 0.8mm 3mm; }
+
+  /* Pages */
+  section.sec { break-before: page; }
+  .qhead { display: flex; align-items: center; gap: 3mm; margin: 0 0 2.5mm; }
+  .qhead .n { min-width: 10mm; height: 8mm; padding: 0 2mm; border-radius: 4px; background: var(--accent); color: #fff; font-weight: 700; font-size: 11pt; display: flex; align-items: center; justify-content: center; }
+  .qhead h1 { font-family: "Noto Serif Display", "Noto Serif", Georgia, serif; font-size: 17pt; color: var(--ink); margin: 0; line-height: 1.15; }
+  .short { background: var(--tint); border-left: 3px solid var(--accent); border-radius: 0 4px 4px 0; padding: 2.6mm 3.5mm; margin: 0 0 3.5mm; font-size: 10.2pt; }
+  .short p:last-child, .card p:last-child, .box p:last-child { margin-bottom: 0; }
+  .box { border: 0.6pt solid var(--line); border-radius: 5px; padding: 2.6mm 3.5mm; margin: 0 0 3mm; break-inside: avoid; }
+  .box.warn { background: #fffaf0; border-color: #f1e2b4; }
+  .box.good { background: #f4fbf6; border-color: #9fd3b6; }
+  .box.bad { background: #fdf4f2; border-color: #e7b9b3; }
+  .box ul { margin-bottom: 0; }
+
+  figure { margin: 0 0 3.5mm; break-inside: avoid; }
+  figure img { width: 100%; display: block; border-radius: 4px; }
+  figcaption { font-size: 8pt; font-style: italic; color: var(--muted); margin-top: 1.2mm; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; align-items: start; }
+  .two.text-phone { grid-template-columns: 1fr 58mm; }
+  .phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin: 0 0 3mm; break-inside: avoid; }
+  .phones.two-up { grid-template-columns: repeat(2, 58mm); justify-content: center; gap: 8mm; }
+  .phones figure { margin: 0; }
+  .phones img, img.phone { border: 0.6pt solid var(--line); border-radius: 8px; width: 100%; display: block; }
+  .crop { border: 0.6pt solid var(--line); border-radius: 8px; overflow: hidden; }
+  .crop img { border: 0; border-radius: 0; }
+
+  table.t { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin: 0 0 3mm; break-inside: avoid; }
+  table.t th, table.t td { border: 0.5pt solid #cdcdcd; padding: 1.2mm 1.8mm; text-align: left; vertical-align: top; }
+  table.t th { background: #e3e8f5; font-weight: 700; }
+  table.t tr:nth-child(even) td { background: #fafaf8; }
+  table.t td.r, table.t th.r { text-align: right; white-space: nowrap; }
+  table.changes td:first-child { font-weight: 700; white-space: nowrap; }
+  table.changes tr.rec td { background: #f4fbf6; }
+  table.changes tr.opt td { background: #fffaf0; }
+  .yes { color: var(--good); font-weight: 700; }
+  .no { color: var(--critical); font-weight: 700; }
+  .pill { display: inline-block; padding: 0 2mm; border-radius: 7px; font-weight: 700; font-size: 8pt; white-space: nowrap; }
+  .pill.stop { background: var(--tint-bad); color: var(--critical); }
+  .pill.keep { background: var(--tint-good); color: var(--good); }
+  .pill.luck { background: var(--tint-warn); color: #8a5d00; }
+  .pill.wait { background: #eceef3; color: #454b5e; }
+  .sources { font-size: 7.8pt; color: var(--ink-2); }
+  .sources li { margin: 0.4mm 0; }
+  .sources a { word-break: break-all; }
+</style>
+</head>
+<body>
+
+<!-- ======================= Cover ======================= -->
+<div class="kicker">ANSWER TO YOUR QUESTION · NOTHING IS BUILT YET · THE PLAN DOES NOT CHANGE UNTIL YOU PICK</div>
+<div class="title">Can it be a lifesaver?</div>
+<div class="subtitle">A raw answer, three tools that save writers money and worry, and how they reach tons of people</div>
+<div class="meta">
+  <span>Date</span><span>2026-10-16</span>
+  <span>Prepared for</span><span>Pipe199x</span>
+  <span>Prepared by</span><span>Claude Code (Claude Opus 5.5)</span>
+  <span>Your question</span><span>"I want people to say 'Man, whoever made this is a lifesaver!', using A/B testing. I see it a bit boring. How do we become a lifesaver for tons of people?"</span>
+  <span>Try it</span><span>The clickable prototype: <code>docs/plan/DEMO.html</code> (offline), and a private claude.ai page (link in the chat). EN/ES button at the top.</span>
+</div>
+
+<h2 style="margin-top: 0">The short answer</h2>
+<div class="answers">
+  <div class="row"><span>Today</span><span><b>No, it's not a lifesaver yet.</b> It's a good calculator that comes with homework: pay for ads, wait a week, type numbers, then get an answer Meta already gave you.</span></div>
+  <div class="row"><span>The fix</span><span><b>A/B testing becomes the engine, never the product.</b> We start from a pain the writer feels today, and the test runs underneath.</span></div>
+  <div class="row"><span>Three tools</span><span><b>Duel:</b> a free cover test with real readers. <b>Ad Doctor:</b> what to stop paying for in your ads. <b>Real or luck?:</b> the truth about a sales change, in 5 seconds.</span></div>
+  <div class="row"><span>Tons of people</span><span>Every Duel link brings readers, some of them are writers, and every result fills the library by itself. The same Duel can later serve anyone choosing between two images.</span></div>
+  <div class="row"><span>What I need</span><span>Try the prototype. Show it to 5 writers. Then pick from <b>L1–L11</b> on the last page.</span></div>
+</div>
+<div class="formula">
+  <span>a pain you feel today</span><i>+</i><span>an answer in minutes</span><i>+</i><span>free, no sign-up</span><i>+</i><span>you see what you saved</span><i>+</i><span>you tell a friend</span><i>=</i><b>a lifesaver</b>
+</div>
+<p class="small muted" style="margin-top: 2mm">Your Word-to-PDF example has all five. Today's tool has only the third.</p>
+
+<!-- ======================= 1. Why boring ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">1</span><h1>Why it feels boring today</h1></div>
+  <div class="short"><p>The tool gives its answer at the end of a week of work and money. A lifesaver gives it in the first minute.</p></div>
+  <figure><img src="figs/ls_paths.png" alt="Today: pay for two ads, set up a split test, wait 7 days, type the numbers in, get Use B. Lifesaver: upload two covers, share one link, readers vote, the reveal."></figure>
+  <table class="t">
+    <tr><th style="width: 6mm">#</th><th>Why it feels boring</th><th>What it means</th></tr>
+    <tr><td>1</td><td><b>It only helps writers who already run A/B tests in ads.</b></td><td>Most writers don't. The ones who do already get the winner from Meta or TikTok.</td></tr>
+    <tr><td>2</td><td><b>It asks for something before it gives anything.</b></td><td>Money for two ads, a week of waiting, typing numbers. Then one line.</td></tr>
+    <tr><td>3</td><td><b>The library is empty on day one.</b></td><td>It fills only if writers do extra, unpaid work after their test.</td></tr>
+    <tr><td>4</td><td><b>It speaks our language.</b></td><td>We say "tests, clicks, p-value". Writers think "Which cover? Why don't I sell? Where does my money go?"</td></tr>
+    <tr><td>5</td><td><b>Nothing to show a friend.</b></td><td>No "look what this told me" moment, so nobody spreads it.</td></tr>
+  </table>
+  <div class="two">
+    <div class="box good"><p><b>New rule.</b> A/B testing is the engine, never the product. Nobody wants "an A/B test". People want "the right cover", "my money back" and "the truth".</p></div>
+    <div class="box bad"><p><b>Stop doing:</b></p><ul><li>opening with the library (empty on day one);</li><li>opening with "Plan an ad test" (homework);</li><li>statistics words on the first screen.</li></ul></div>
+  </div>
+</section>
+
+<!-- ======================= 2. Three moments ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">2</span><h1>Three painful moments, three lifesavers</h1></div>
+  <div class="two text-phone">
+    <div>
+      <table class="t">
+        <tr><th>The moment</th><th>What writers do today</th><th>The lifesaver</th></tr>
+        <tr><td><b>"Which cover?"</b> (or title, blurb, book idea)</td><td>Ask friends or post a poll: people see both covers and the votes, and most are friends. Or pay PickFu: about $1 per answer, about $50 for 50 people.</td><td><b>Duelo · Duel</b>: a free, real A/B test with readers. Results in days.</td></tr>
+        <tr><td><b>"My ads eat my money"</b></td><td>Guess when to stop a keyword. Advice goes from "2–3 clicks" to "30+ clicks".</td><td><b>Doctor de anuncios · Ad Doctor</b>: drop the report, see what to stop. 10 seconds.</td></tr>
+        <tr><td><b>"I changed something and sales went up. Did it work?"</b></td><td>Believe it.</td><td><b>¿Real o suerte? · Real or luck?</b>: two numbers, the truth in 5 seconds.</td></tr>
+      </table>
+      <div class="box"><p><b>A new home page with three doors.</b> Each door is a pain, in the writer's words. No forms, no statistics words. The library and the ad-test planner move inside.</p>
+      <p><b>A warmer voice everywhere:</b> plain, kind, direct. For example: "Too close to call. Both work. Pick the one you love and stop worrying."</p></div>
+      <div class="box warn"><p><b>Where the A/B testing is, in each one:</b></p><ul>
+        <li><b>Duel: a real A/B test with real people.</b> Random assignment, one version per person, a fixed number of readers, a split check (SRM). The "Which would you read?" game sends more readers into the same Duels.</li>
+        <li><b>Ad Doctor: A/B-test math, not an experiment.</b> Each keyword is compared with the book's own average. Amazon decides who sees each keyword, so it shows what loses money, not why.</li>
+        <li><b>Real or luck?: the same math on a before/after count.</b> Not an experiment either, so for a sure answer about a cover or a title it points to a Duel.</li></ul></div>
+    </div>
+    <figure><img class="phone" src="figs/ls-home.png" alt="Home page with three doors"><figcaption>The new home page (prototype, phone).</figcaption></figure>
+  </div>
+</section>
+
+<!-- ======================= 3. Duel 1/2 ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">3</span><h1>The Duel: real A/B testing, free</h1></div>
+  <div class="short"><p>Two covers face each other. Each reader sees only one, picked at random, like a book in a store. Readers decide, not friends.</p></div>
+  <div class="phones">
+    <figure><img src="figs/ls-create.png" alt="Create a Duel"><figcaption>1 · Upload two covers, or two titles, blurbs or book ideas. 30 seconds, no account.</figcaption></figure>
+    <figure><img src="figs/ls-link.png" alt="The Duel link"><figcaption>2 · One link to share on Instagram, WhatsApp, Wattpad, TikTok or a newsletter.</figcaption></figure>
+    <figure><img src="figs/ls-reader.png" alt="What a reader sees"><figcaption>3 · A reader sees one version and taps once: "Would you read the first page?"</figcaption></figure>
+  </div>
+  <div class="two">
+    <div class="box"><p><b>Why this is honest (and a poll is not):</b></p><ul>
+      <li>one version per person, at random: nobody compares side by side;</li>
+      <li>nobody sees the votes, so nobody follows the crowd;</li>
+      <li>the writer's own phone doesn't count, and each visitor votes once;</li>
+      <li>the number of readers is fixed before it starts;</li>
+      <li>a split check (SRM) catches bugs and abuse.</li></ul></div>
+    <div class="box good"><p><b>Bonus for the writer:</b> voters who said yes can read the first page and follow the writer's own "tell me when it's out" link. The Duel picks the cover <b>and</b> finds the first readers.</p>
+    <p><b>Bonus for the launch:</b> "Help me choose my cover!" is a post followers love. The Duel turns a decision into launch buzz.</p></div>
+  </div>
+</section>
+
+<!-- ======================= 4. Duel 2/2 ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">4</span><h1>The Duel: the honest result</h1></div>
+  <div class="phones">
+    <figure><img src="figs/ls-progress.png" alt="Progress without the winner"><figcaption>4 · Progress, not the winner. No peeking means no fake winners from a lucky streak.</figcaption></figure>
+    <figure><img src="figs/ls-verdict.png" alt="The reveal"><figcaption>5 · The reveal, in plain words, with the numbers for the curious (prototype, example votes).</figcaption></figure>
+    <figure><img src="figs/ls-card.png" alt="The share card"><figcaption>6 · A ready post: "My readers chose my cover!" Every viewer sees "test yours free".</figcaption></figure>
+  </div>
+  <figure><img src="figs/ls_votes.png" alt="Readers needed: 186 for a big difference, 326 for a clear one, 712 for a small one, 2,754 for a tiny one"></figure>
+  <div class="box warn"><p><b>Four honest endings, never a guess:</b> "Readers chose B" (not luck) · "Too close to call: both work" (also an answer) · "Not sure yet: about N more readers" · "Not fair yet" (the random split broke, so no winner). The prototype shows all four.</p></div>
+</section>
+
+<!-- ======================= 5. Play + thanks ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">5</span><h1>No followers? Vote to earn votes</h1></div>
+  <div class="short"><p>"¿Cuál leerías? · Which would you read?" is a 2-minute game. Every vote a writer gives on other writers' Duels earns one vote for their own. Photofeeler uses this same "karma" model for profile photos.</p></div>
+  <div class="phones two-up">
+    <figure><img src="figs/ls-play.png" alt="The game"><figcaption>The game: one cover, one tap, a counter of votes earned.</figcaption></figure>
+    <figure><img src="figs/ls-thanks.png" alt="Thank-you page"><figcaption>What a voter gets after voting: the first page, the writer's link, and "test yours free".</figcaption></figure>
+  </div>
+  <div class="two">
+    <div class="box"><p><b>Why people play:</b> judging covers is fun, takes seconds, and readers discover new books. Writers play because it fills their own Duel.</p></div>
+    <div class="box warn"><p><b>The cost:</b> people upload images, so someone checks them. At first, you approve which Duels enter the game. Links stay unlisted, there is a report button, and covers are deleted 30 days after the Duel.</p></div>
+  </div>
+</section>
+
+<!-- ======================= 6. Ad Doctor ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">6</span><h1>Ad Doctor: stop paying for what doesn't sell</h1></div>
+  <div class="short"><p>The writer drops in the Amazon Ads search-term report. In seconds, in plain words: what to stop, what to keep, what is luck, and how long to wait. <b>The file never leaves the browser.</b></p></div>
+  <div class="two text-phone">
+    <div>
+      <table class="t">
+        <tr><th>Verdict</th><th class="r">In the example</th><th>Rule (in plain words)</th></tr>
+        <tr><td><span class="pill stop">Stop</span></td><td class="r num">8 · USD 142 a month</td><td>At least 10 clicks, and 90% sure it earns less than it costs.</td></tr>
+        <tr><td><span class="pill keep">Keep</span></td><td class="r num">2</td><td>At least 10 clicks, and 90% sure it earns more than it costs.</td></tr>
+        <tr><td><span class="pill luck">Luck</span></td><td class="r num">6</td><td>Looks great, but from fewer than 15 clicks. Don't raise the bid yet.</td></tr>
+        <tr><td><span class="pill wait">Wait</span></td><td class="r num">8</td><td>Wait about N more clicks. If it's too close to break-even to judge soon, pause it when money is tight.</td></tr>
+      </table>
+      <div class="box"><p><b>How it decides.</b> Each keyword starts from the book's own average, as if it already had 20 clicks; then its own clicks and sales move it (a beta-binomial model). Break-even = cost per click ÷ what the writer earns per sale (70% of a USD 4.99 ebook is about USD 3.40).</p></div>
+      <div class="box warn"><p><b>Why writers need it.</b> Advice on when to pause a keyword goes from "2–3 clicks" to "30+ clicks". The right number depends on the book. The Doctor computes it.</p>
+      <p class="small">Meta Ads: book ads there usually send people to Amazon, so Meta sees clicks, not sales. The full tool compares cost per click instead.</p></div>
+    </div>
+    <figure><img class="phone" src="figs/ls-doctor.png" alt="Ad Doctor summary"><figcaption>The example report: 24 keywords, 30 days, a Spanish romance ebook (invented numbers).</figcaption></figure>
+  </div>
+  <div class="two" style="grid-template-columns: 64mm 1fr">
+    <figure class="crop"><img src="figs/ls-doctor-stop.png" alt="The first keywords to stop, each with its reason"></figure>
+    <div class="box good"><p><b>Every verdict comes with its reason</b>, in the writer's words: "64 clicks · 1 sale · USD 38.40 spent. You need 1 sale every 6 clicks to break even. This keyword is clearly below that."</p>
+    <p>That's the screenshot a writer posts in a Facebook group: "this free tool found USD 142 a month I was wasting."</p></div>
+  </div>
+</section>
+
+<!-- ======================= 7. Real or luck ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">7</span><h1>Real or luck? The truth in 5 seconds</h1></div>
+  <div class="two text-phone">
+    <div>
+      <div class="short"><p>"9 sales last week, 14 this week, after my new blurb. Did it work?" It's the most-asked question in writer groups.</p></div>
+      <div class="box"><p><b>The answer:</b> "You can't tell yet. A jump like this happens by luck about 2 times in 5. If both paces held for about 28 days each, you'd know."</p>
+      <p>With 9 → 30 sales the answer flips: "It's real. A change this big happens by luck less than 1 time in 1,000."</p></div>
+      <div class="box"><p><b>Inside:</b> an exact test on the two sales counts, adjusted for the number of days. It also says: "a holiday, a promotion, a new review or a price change can move sales too".</p></div>
+      <div class="box good"><p><b>Why it's a lifesaver:</b> it stops writers from rebuilding everything around a lucky week, or dropping a good change after an unlucky one. And it points to the Duel when the change was a cover or a title.</p></div>
+    </div>
+    <figure><img class="phone" src="figs/ls-luck.png" alt="Real or luck screen"><figcaption>The prototype, with the example numbers.</figcaption></figure>
+  </div>
+</section>
+
+<!-- ======================= 8. Tons of people ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">8</span><h1>How it reaches tons of people</h1></div>
+  <figure><img src="figs/ls_loop.png" alt="The loop: a writer must choose, a free Duel, readers vote, test yours free, the result joins the library, writers who can't test still get an answer"></figure>
+  <div class="two">
+    <div>
+      <ul>
+        <li><b>The library finally fills.</b> Duels are free and fast, so results pile up, for example "covers with a face won 6 of 9 romance Duels" (example). That's the magic you asked for in v2.2, without waiting for ad tests.</li>
+        <li><b>Every voter is a door.</b> Each Duel page says "Do you write? Test yours free".</li>
+        <li><b>Wattpad:</b> Spanish is its second-largest language (Wattpad's president). Its writers pick covers and titles all the time, and they have readers to vote.</li>
+        <li><b>Later, optional:</b> the same Duel for anyone choosing between two images or texts: video thumbnails, product photos, menus, posters. Writers first; "for everyone" later.</li>
+      </ul>
+    </div>
+    <div class="phones" style="grid-template-columns: repeat(2, 1fr); gap: 4mm">
+      <figure><img src="figs/ls-es-home.png" alt="Home in Spanish"><figcaption>In Spanish, for writers in Latin America.</figcaption></figure>
+      <figure><img src="figs/ls-es-reader.png" alt="Reader view in Spanish"><figcaption>"¿Leerías la primera página?"</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 9. Platform ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">9</span><h1>What it does for the data platform</h1></div>
+  <div class="short"><p>Real votes from real people flow through the same Kafka → Databricks pipeline. The platform stops being only a simulation.</p></div>
+  <figure><img src="figs/ls_flow.png" alt="Live: reader's phone, Cloudflare Worker and D1, writer's progress page. Daily: D1 export, Kafka, Bronze, Silver, Gold, library.json"></figure>
+  <div class="two">
+    <div class="box"><p><b>Real problems to show recruiters:</b></p><ul>
+      <li>a randomization check (SRM) on every Duel;</li>
+      <li>double votes and bots filtered in Silver;</li>
+      <li>no-peeking rules, written before the test;</li>
+      <li>a library built from many real tests;</li>
+      <li>2 new Gold views (18 → 20): Duel results and the Duel library.</li></ul></div>
+    <div class="box"><p><b>What stays:</b> the simulated store, for recruiters only, under "Behind the scenes". It still checks the math against a known truth.</p>
+    <p><b>Behind the screen:</b> the prototype shows, beside every screen, what happens underneath.</p></div>
+  </div>
+  <figure><img src="figs/ls-desktop.png" alt="Prototype on a wide screen with the behind-the-screen rail" style="border: 0.6pt solid var(--line)"><figcaption>The prototype on a wide screen: the reader's view, and "Behind the screen" on the right.</figcaption></figure>
+</section>
+
+<!-- ======================= 10. Costs and risks ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">10</span><h1>Honest costs and risks</h1></div>
+  <table class="t">
+    <tr><th style="width: 32mm">Topic</th><th>What it means</th></tr>
+    <tr><td><b>Effort</b></td><td>All recommended changes add about <b>74–110 h</b>. The plan goes from about 154 h to about <b>228–264 h</b>, about 11–13 weeks at 20 h a week. The "Lifesaver launch" package alone: about <b>36–52 h</b>.</td></tr>
+    <tr><td><b>$0 still holds</b> (checked 2026-10-16)</td><td>
+      Cloudflare Workers Free: 100,000 requests a day. D1 Free: 500 MB per database, 10 databases, 2 MB per row, 100,000 rows written a day.<br>
+      Covers are shrunk in the browser before upload (the prototype turned a test image into a 24 KB cover; real covers about 60 KB), so one database holds thousands of Duels. Covers are deleted 30 days after the Duel.<br>
+      Cloudflare R2 (file storage) asks for a payment method, so we don't use it.<br>
+      Fix for plan v3: the plan says D1 has "5 GB"; that is per account, and each database gets 500 MB.</td></tr>
+    <tr><td><b>Privacy</b></td><td>Today only the opt-in Share leaves the browser (D22, D24). A Duel needs voters' anonymous votes to leave it too: counts only, no cookies, no names, the IP never kept longer than one day. Ad Doctor and Real or luck stay fully in the browser.</td></tr>
+    <tr><td><b>Moderation</b></td><td>People upload images. Links are unlisted; at first you approve Duels before they enter the game; a report button; automatic deletion. A few minutes a week at first.</td></tr>
+    <tr><td><b>Votes are not sales</b></td><td>A Duel shows what grabs readers' attention. We say so on the result page.</td></tr>
+    <tr><td><b>Cheating</b></td><td>A writer voting for their favorite only fools themselves. Still: one vote per visitor per Duel, the writer's phone not counted, and the SRM check.</td></tr>
+    <tr><td><b>Cold start</b></td><td>Smaller, but real. The first Duels depend on the writer's own followers; the game helps writers without any.</td></tr>
+    <tr><td><b>Ad report formats</b></td><td>Amazon's columns and number formats vary by country and language. The prototype already reads English and Spanish files (commas or semicolons). Founding writers' sample reports make it robust.</td></tr>
+  </table>
+
+  <h2>What already exists, and what it lacks</h2>
+  <table class="t">
+    <tr><th>Option</th><th>Cost</th><th>Fair test?</th><th>What it lacks</th></tr>
+    <tr><td>Facebook or Instagram poll</td><td>Free</td><td class="no">No</td><td>Both covers side by side, visible votes, mostly friends.</td></tr>
+    <tr><td>Rate Book Cover (stars from strangers)</td><td>Free, paid extras</td><td class="no">No</td><td>Star ratings of one cover, not two versions; voters aren't your readers.</td></tr>
+    <tr><td>PickFu</td><td>About $1 per answer (about $50 for 50 people), plus about $0.40 per answer for each audience filter</td><td>Panel</td><td>Paid per poll; English-first panel.</td></tr>
+    <tr><td>A/B test in Meta or BookBub ads</td><td>Ad money</td><td class="yes">Yes</td><td>Costs money and a week, and needs ad skills.</td></tr>
+    <tr><td><b>Duel</b></td><td><b>Free</b></td><td class="yes"><b>Yes</b></td><td>Needs voters: the writer's followers plus the game.</td></tr>
+  </table>
+</section>
+
+<!-- ======================= 11. The new look ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">11</span><h1>The new look, in the style of cursor.com</h1></div>
+  <div class="short"><p>You asked for cursor.com's style. The prototype now uses it: warm paper colors, regular-weight type, pill buttons, app windows on paintings, and a light/dark switch. We copy the style, never their name, logo, fonts or images.</p></div>
+  <figure><img src="figs/ls-desktop-home.png" alt="The home page on a wide screen: a two-tone headline, two pill buttons, and an app window on a painted seascape that shows a Duel in progress" style="border: 0.6pt solid var(--line)"><figcaption>The home page on a wide screen. On a phone (section 2) the same window is cropped, as on cursor.com.</figcaption></figure>
+  <div class="two">
+    <div class="box"><p><b>Taken from cursor.com (the style):</b></p><ul>
+      <li>their color system: warm off-white paper, near-black ink, soft card grays, one orange for actions;</li>
+      <li>type at one regular weight, tight letter spacing, and two-tone headlines (dark, then gray);</li>
+      <li>pill buttons, flat cards with small corners, small uppercase labels, mono text for "machine" notes;</li>
+      <li>product shown inside desktop windows on top of paintings; a sidebar with sections, as in their app;</li>
+      <li>a footer with a system/light/dark switch, and a phone menu with big links.</li></ul></div>
+    <div class="box good"><p><b>Ours (nothing copied):</b></p><ul>
+      <li>the name, the logo (two book covers) and every word;</li>
+      <li>free fonts: Instrument Sans, EB Garamond (book text), Geist Mono, embedded in the page, so it works offline;</li>
+      <li>the paintings: seascapes with a lighthouse, drawn in code when the page opens, no image files;</li>
+      <li>colors with a meaning: blue = version A, violet = version B, green / red / orange = verdicts;</li>
+      <li>"Behind the screen" as a document tab next to each tool.</li></ul>
+    <p class="small">Change L11 on the next page brings this look to the real site and to the plan's mockups.</p></div>
+  </div>
+</section>
+
+<!-- ======================= Changes ======================= -->
+<section class="sec">
+  <div class="qhead"><span class="n">✓</span><h1>Changes for you to pick (L1–L11)</h1></div>
+  <table class="t changes">
+    <tr><th>#</th><th>Change</th><th>My advice</th><th class="r">Effort</th></tr>
+    <tr class="rec"><td>L1</td><td><b>Duel</b>: cover, title, blurb or book idea. One link, one version per person, progress without peeking, the reveal and a share image. Optional first page and the writer's own "tell me when it's out" link.</td><td>Yes, the main one</td><td class="r">25–35 h</td></tr>
+    <tr class="rec"><td>L2</td><td><b>Which would you read?</b> A game: readers vote, and writers earn votes by voting. You approve entries at first.</td><td>Yes</td><td class="r">8–12 h</td></tr>
+    <tr class="rec"><td>L3</td><td><b>Ad Doctor</b>: Amazon and Meta reports, read in the browser. Stop / keep / luck / wait N clicks, and the money to stop wasting.</td><td>Yes</td><td class="r">18–26 h</td></tr>
+    <tr class="rec"><td>L4</td><td><b>Real or luck?</b>: two numbers, an honest answer.</td><td>Yes</td><td class="r">3–5 h</td></tr>
+    <tr class="rec"><td>L5</td><td><b>New home page with three doors</b>, one per pain. The library and the ad-test planner move inside.</td><td>Yes</td><td class="r">3–5 h</td></tr>
+    <tr class="rec"><td>L6</td><td><b>The library fills itself from Duels</b>: opt-in, same 5-result minimum, by genre × book language × what changed.</td><td>Yes</td><td class="r">4–6 h</td></tr>
+    <tr class="rec"><td>L7</td><td><b>Real events through the platform</b>: Duel events → Kafka → Bronze/Silver/Gold, an SRM check per Duel, a bot filter, 2 new Gold views (18 → 20).</td><td>Yes</td><td class="r">8–12 h</td></tr>
+    <tr class="rec"><td>L8</td><td><b>Lifesaver first</b>: ship L1 + L4 + L5 right after Phase 0 (around week 3), then build the pipeline while real data arrives.</td><td>Yes (your call)</td><td class="r">+2–4 h</td></tr>
+    <tr class="rec"><td>L9</td><td><b>A warmer voice</b>: plain, kind, direct sentences on every screen.</td><td>Yes</td><td class="r">included</td></tr>
+    <tr class="opt"><td>L10</td><td><b>Later: "for everyone"</b>. The same Duel for any creator or small seller.</td><td>Not now</td><td class="r">0 h now</td></tr>
+    <tr class="rec"><td>L11</td><td><b>New look in the style of cursor.com</b> (section 11): warm paper colors, regular-weight type, pill buttons, app windows on paintings, light and dark themes. Our own name, logo and paintings; free fonts. For the site, the mockups and the prototype.</td><td>Yes (you asked)</td><td class="r">3–5 h</td></tr>
+  </table>
+  <div class="two">
+    <div class="box good"><p><b>Lifesaver launch:</b> L1 + L4 + L5 + L8 + L9 + L11, about <b>36–52 h</b>. Real writers use it around week 3.</p></div>
+    <div class="box"><p><b>Full:</b> L1–L9 and L11, about <b>74–110 h</b>. Plan total about 228–264 h.</p></div>
+  </div>
+  <div class="short"><p><b>My advice:</b> before we build anything, show the prototype to 5 writers. If nobody asks "when can I use it?", we change it first.</p>
+  <p><b>What to reply:</b> for example "Lifesaver launch", "Full", or a list such as "L1, L3, L4, L8". Then I write plan v3.0, update the demo, render, and stop for your review. Nothing gets built until you say "start Phase 0".</p></div>
+
+  <h2>Sources (checked 2026-10-16)</h2>
+  <ul class="sources">
+    <li>PickFu pricing: <a href="https://www.pickfu.com/help/en/articles/8188655-pickfu-pricing-explained">PickFu pricing explained</a> · <a href="https://help.pickfu.com/en/articles/2039821-how-much-will-my-poll-cost">How much will my poll cost</a></li>
+    <li>Photofeeler karma: <a href="https://www.photofeeler.com/help/karma-credits">Using Photofeeler for free</a></li>
+    <li>Amazon Ads for KDP books (US, Mexico, Spain and more): <a href="https://kdp.amazon.com/en_US/help/topic/G201499010">KDP help</a> · search-term report columns: <a href="https://www.vappingo.com/word-blog/search-terms-report-amazon-ads/">Vappingo guide</a></li>
+    <li>When to pause a keyword (2–3 clicks to 30+): <a href="https://www.adbadger.com/blog/amazon-ppc-education/how-to-optimize-keywords-with-0-sales-in-amazon-ppc/">AdBadger</a> · <a href="https://www.vappingo.com/word-blog/amazon-ads-mistakes-kdp-authors/">Vappingo: mistakes</a> · <a href="https://www.vappingo.com/word-blog/kdp-amazon-ads-weekly-coach/">Vappingo: weekly coach</a></li>
+    <li>Meta Ads export (vendor guide): <a href="https://adsuploader.com/blog/export-facebook-ads-data">adsuploader</a></li>
+    <li>Cloudflare: <a href="https://developers.cloudflare.com/d1/platform/pricing/">D1 pricing</a> · <a href="https://developers.cloudflare.com/d1/platform/limits/">D1 limits</a> · <a href="https://developers.cloudflare.com/workers/platform/pricing/">Workers pricing</a> · <a href="https://developers.cloudflare.com/turnstile/plans/">Turnstile plans</a> · R2 needs a payment method (third-party, re-check at phase start): <a href="https://eastondev.com/blog/en/posts/dev/20251130-r2-picgo-setup/">eastondev</a></li>
+    <li>Free cover ratings today: <a href="https://nicholasrossis.me/?p=4415">Nicholas Rossis on Rate Book Cover</a> · cover tests with paid ads: <a href="https://insights.bookbub.com/boosted-series-sales-testing-cover-designs/">BookBub Insights</a></li>
+    <li>Wattpad: "Spanish is the second largest language on the platform" (Jenny Lam, Wattpad president, undated interview): <a href="https://digitalcontent.prensariozone.com/?p=136822">Prensario</a></li>
+  </ul>
+</section>
+
+</body>
+</html>

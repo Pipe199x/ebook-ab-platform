@@ -1,0 +1,25 @@
+flowchart TB
+  subgraph SRC["Laptop (WSL2) or the GitHub Actions daily run"]
+    direction LR
+    PROD["simulator<br/>idempotent, zstd, 50 KiB/s"]
+    MON["guardrail-monitor<br/>consumer group x3<br/>alerts and DLQ to market.ops.v1"]
+    PROD ~~~ MON
+  end
+  KAFKA[["Kafka: Aiven free tier, local Docker, or CI service container<br/>5 topics x 2 partitions"]]
+  subgraph BRIDGE["lakehouse-bridge: a real consumer group"]
+    direction LR
+    POLL["poll a partition batch<br/>offsets f..l"] --> FILE["write deterministic<br/>f-l.jsonl.gz"] --> UP["Files API upload<br/>overwrite=False"] --> COMMIT["commit offset l+1<br/>only after upload"]
+  end
+  FILES["Files that skip Kafka (D30)<br/>daily D1 export: Duel votes, shared results<br/>Upworthy CSV, Gutenberg catalog"]
+  subgraph DBX["Databricks Free Edition (serverless): one SDP pipeline, run by a Lakeflow Job"]
+    direction LR
+    VOL[("UC volume<br/>landing/ and landing_real/")] --> BR["Bronze<br/>Auto Loader<br/>same schema as A"] --> SV["Silver"] --> GD["Gold<br/>20 MVs"] --> NB["analysis notebooks<br/>experiment_results"]
+  end
+  subgraph WEB["Public website (GitHub Pages)"]
+    SITE["React site<br/>JSON exported by CI"]
+  end
+  SRC -->|"produce; monitor consumes"| KAFKA
+  KAFKA -->|consume| BRIDGE
+  BRIDGE -->|"files land in the UC volume"| DBX
+  FILES -->|"Files API to landing_real/"| DBX
+  DBX -->|"Gold summaries"| WEB
