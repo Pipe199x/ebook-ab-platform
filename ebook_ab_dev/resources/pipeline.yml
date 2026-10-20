@@ -1,0 +1,14 @@
+# Hello world pipeline
+
+resources:
+  pipelines:
+    hello_world:
+      comment: Simple pipeline that runs sample notebook.
+      definition:
+        name: hello_world
+        # placeholder
+        tasks:
+          - task_key """
+              notebook_task:
+                notebook_path: ../src/sample_notebook.ipynb
+          """
