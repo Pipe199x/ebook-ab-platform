@@ -8,7 +8,6 @@ resources:
         name: hello_world
         # placeholder
         tasks:
-          - task_key """
-              notebook_task:
-                notebook_path: ../src/sample_notebook.ipynb
-          """
+          - task_key: notebook_task
+            notebook_task:
+              notebook_path: ../src/sample_notebook.ipynb
