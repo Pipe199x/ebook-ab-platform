@@ -1,0 +1,39 @@
+# Bundle for ebook_ab_dev development
+bundle:
+  name: ebook_ab_dev
+  uuid: 123e4567-e89b-12d3-a456-426614174000
+include:
+  - resources/*.yml
+artifacts:
+  python_artifact:
+    type: whl
+    build: uv build --wheel
+variables:
+  catalog:
+    description: Catalog for dev
+  schema:
+    description: Schema for dev
+  pepper:
+    description: Secret pepper value
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-1f40e39c-186c.cloud.databricks.com
+    variables:
+      catalog: workspace
+      schema: ${workspace.current_user.short_name}
+      pepper: ${var.pepper}
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-1f40e39c-186c.cloud.databricks.com
+      root_path: /Workspace/Users/duqueandres800@gmail.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: workspace
+      schema: prod
+      pepper: ${var.pepper}
+    permissions:
+      - user_name: duqueandres800@gmail.com
+        level: CAN_MANAGE
