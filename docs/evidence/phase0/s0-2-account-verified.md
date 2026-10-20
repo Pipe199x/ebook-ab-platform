@@ -22,6 +22,30 @@
 
 O27 (`PIP-38` card `s0.2:o27`, answered 09:32Z): sign-up asked for a card **yes**, credits **$100**, console service access **unknown**.
 
+### O27 part 3 — answered here: the console allows every service P1 names
+
+P1 (§3.4) lists Lambda, DynamoDB, Step Functions, EventBridge Scheduler, CloudFront, S3, SNS, Systems Manager. Read-only probes with the root session, `us-east-1`:
+
+| Service | Probe | Result |
+|:--|:--|:--|
+| S3 | `s3api list-buckets` | OK |
+| DynamoDB | `dynamodb list-tables`, `describe-limits` | OK |
+| Lambda | `lambda list-functions` | OK |
+| Step Functions | `stepfunctions list-state-machines` | OK |
+| EventBridge Scheduler | `scheduler list-schedules` | OK |
+| EventBridge | `events list-event-buses` | OK |
+| CloudFront | `cloudfront list-distributions` | OK |
+| SNS | `sns list-topics` | OK |
+| Systems Manager | `ssm describe-parameters` | OK |
+| CloudFormation | `cloudformation list-stacks` | OK |
+| IAM | `iam list-users`, `list-roles`, `list-instance-profiles` | OK |
+| Glue / Athena / ECR / Logs / Secrets Manager / KMS / Budgets | one read call each | OK |
+| **Kinesis** | `kinesis list-streams` | **`SubscriptionRequiredException` — paid plan only** |
+
+The single failure is expected and already designed out: plan §1 says MSK and Kinesis are not on the Free plan, and **D52** keeps Kafka off AWS entirely (Docker on the laptop, a GitHub Actions service container in CI). No P1 item is blocked, so **P1 passes as far as credentials allow**; the probe module (PIP-32 / P0-9) still has to record it from code.
+
+Note for whoever runs P1: `s3control get-public-access-block` returns `NoSuchPublicAccessBlockConfiguration` because no account-level block exists yet. That is a **finding**, not a permission error — the account-level public-access block is exactly one of the guardrails P0-4 (PIP-27) sets up.
+
 ## Why root matters
 
 `~/.aws/config` holds `login_session = arn:aws:iam::208588111983:root` and the credential source is `aws login` — a session, not a long-lived key, which is the safer of the two. But every script we run would execute as root, and root MFA is off, so the account has neither of the two guardrails plan §5 Ph0 step 4 asks for.
