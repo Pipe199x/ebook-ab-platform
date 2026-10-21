@@ -21,7 +21,7 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
       - name: Synthesize CDK
-        run: cd infra && cdk synth --json 2>&1 | sed -n '/^{/,/^}$/p' > ../cdk-output.json
+        run: cd infra && cdk synth --json > ../cdk-output.json
       - name: Run guardrail (should pass)
         run: node scripts/guardrail.js
       - name: Create faulty stack with Glue Job
