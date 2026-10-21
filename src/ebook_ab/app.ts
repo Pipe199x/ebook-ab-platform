@@ -13,4 +13,5 @@ export class BudgetStack extends Stack {
 const app = new App();
 new BudgetStack(app, 'EbookAbBudgetStack');
 new FoundationStack(app, 'EbookAbFoundationStack');
+new DuelStack(app, 'EbookAbDuelStack');
 app.synth();
