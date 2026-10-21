@@ -1,0 +1,10 @@
+# Hello World pipeline definition
+pipelines:
+  hello_world:
+    name: hello_world
+    catalog: ebook_ab_dev
+    target: dev
+    storage: ""
+    development: true
+    # Simple notebook task placeholder
+    notebook_path: ../src/hello_world_notebook.ipynb
