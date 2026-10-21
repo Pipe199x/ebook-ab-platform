@@ -1,0 +1,20 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "558832a105be1faf3d77d5ea06c5e37b43e48783204eb20a213a0abad3fb57fa": {
+      "displayName": "FoundationStack Template",
+      "source": {
+        "path": "FoundationStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-73b3b6d0": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "558832a105be1faf3d77d5ea06c5e37b43e48783204eb20a213a0abad3fb57fa.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

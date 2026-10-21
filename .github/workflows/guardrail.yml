@@ -10,14 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
       - name: Synthesize CDK
-        run: npx cdk synth --json > cdk-output.json
+        run: cd infra && cdk synth --json 2>&1 | sed -n '/^{/,/^}$/p' > ../cdk-output.json
       - name: Run guardrail (should pass)
         run: node scripts/guardrail.js
       - name: Create faulty stack with Glue Job
