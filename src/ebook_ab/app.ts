@@ -1,5 +1,6 @@
 // src/ebook_ab/app.ts
 import { App, Stack, StackProps } from 'aws-cdk-lib';
+import { FoundationStack } from './foundation';
 import { Budgets } from './budgets';
 
 export class BudgetStack extends Stack {
@@ -11,4 +12,5 @@ export class BudgetStack extends Stack {
 
 const app = new App();
 new BudgetStack(app, 'EbookAbBudgetStack');
+new FoundationStack(app, 'EbookAbFoundationStack');
 app.synth();
