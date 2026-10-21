@@ -20,7 +20,7 @@ def read_bronze(spark: SparkSession, input_path: str, checkpoint_path: str):
 
 if __name__ == "__main__":
     spark = SparkSession.builder.appName("ebook_bronze").getOrCreate()
-    df = read_bronze(spark, "${input_path}", "${checkpoint_path}")
+    df = read_bronze(spark, spark.conf.get("spark.input_path", "s3://ebook-bucket/raw/"), spark.conf.get("spark.checkpoint_path", "dbfs:/tmp/bronze_checkpoint"))
     # Write to Bronze table (Delta Lake)
     (
         df.writeStream.format("delta")
