@@ -13,8 +13,6 @@ variables:
     description: Catalog for dev
   schema:
     description: Schema for dev
-  pepper:
-    description: Secret pepper value
 targets:
   dev:
     mode: development
@@ -24,7 +22,6 @@ targets:
     variables:
       catalog: workspace
       schema: ${workspace.current_user.short_name}
-      pepper: ${var.pepper}
   prod:
     mode: production
     workspace:
@@ -33,7 +30,6 @@ targets:
     variables:
       catalog: workspace
       schema: prod
-      pepper: ${var.pepper}
     permissions:
       - user_name: duqueandres800@gmail.com
         level: CAN_MANAGE

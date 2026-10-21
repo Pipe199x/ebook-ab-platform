@@ -1,0 +1,56 @@
+# Local development only: Kafka 4.2.2 (KRaft) and DynamoDB Local.
+# Plan v4.0: D4 (Kafka 4.2.2 everywhere), D52 (Kafka lives off AWS), D55 (Docker runs only local Kafka).
+# ponytail: single broker, no auth, in-memory DynamoDB — dev/tests on the laptop only; add persistence
+# and TLS/SASL when a Phase 2 test needs them (compose.yml is owned by Phase 2, §5 Phase 2).
+name: ebook-ab-local
+
+services:
+  kafka:
+    image: apache/kafka:4.2.2
+    container_name: ebook-kafka
+    ports:
+      - "127.0.0.1:9092:9092"
+    environment:
+      CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_NUM_PARTITIONS: "2"
+      KAFKA_LOG_RETENTION_HOURS: "72"
+      KAFKA_HEAP_OPTS: "-Xms512m -Xmx1g"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:3.3.2
+    container_name: ebook-dynamodb-local
+    ports:
+      - "127.0.0.1:8000:8000"
+    # Default CMD is `java -jar DynamoDBLocal.jar -inMemory`; tests get a clean table every run.
+    healthcheck:
+      test: ["CMD", "bash", "-c", "</dev/tcp/127.0.0.1/8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  kafka-data:

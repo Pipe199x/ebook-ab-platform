@@ -1,0 +1,4 @@
+{
+  "app": "node dist/ebook_ab/app.js",
+  "context": {}
+}

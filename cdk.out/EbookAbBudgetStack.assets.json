@@ -1,0 +1,20 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "a1ae87814ec7a17c5eb9b3b98ac399a6e934719506cd2e8657ebe2f013b8d36d": {
+      "displayName": "EbookAbBudgetStack Template",
+      "source": {
+        "path": "EbookAbBudgetStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-1655725f": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "a1ae87814ec7a17c5eb9b3b98ac399a6e934719506cd2e8657ebe2f013b8d36d.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

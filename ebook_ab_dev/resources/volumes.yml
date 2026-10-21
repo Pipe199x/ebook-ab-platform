@@ -1,0 +1,5 @@
+# Volume operations
+volumes:
+  ebook_ab_dev:
+    comment: Volume for lakehouse files
+    path: /Volumes/ebook_ab_dev

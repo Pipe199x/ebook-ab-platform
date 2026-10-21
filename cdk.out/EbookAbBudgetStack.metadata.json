@@ -1,0 +1,131 @@
+{
+  "/EbookAbBudgetStack": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "<anonymous> (D:\\abtesting\\dist\\ebook_ab\\app.js:15:1)",
+        "...node internals..."
+      ]
+    },
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "EbookAbBudgetStack.template.json"
+    }
+  ],
+  "/EbookAbBudgetStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EbookAbBudgetStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EbookAbBudgetStack/Budgets/MonthlyDollarBudget": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BudgetsMonthlyDollarBudget49F4EFF7"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new Budgets (D:\\abtesting\\dist\\ebook_ab\\budgets.js:19:9)",
+        "new BudgetStack (D:\\abtesting\\dist\\ebook_ab\\app.js:10:9)",
+        "<anonymous> (D:\\abtesting\\dist\\ebook_ab\\app.js:15:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/EbookAbBudgetStack/Budgets/FreeAllowanceBudget": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BudgetsFreeAllowanceBudgetE3D30C49"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new Budgets (D:\\abtesting\\dist\\ebook_ab\\budgets.js:38:9)",
+        "new BudgetStack (D:\\abtesting\\dist\\ebook_ab\\app.js:10:9)",
+        "<anonymous> (D:\\abtesting\\dist\\ebook_ab\\app.js:15:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/EbookAbBudgetStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...App.synth in aws-cdk-lib...",
+        "<anonymous> (D:\\abtesting\\dist\\ebook_ab\\app.js:16:5)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/EbookAbBudgetStack/CDKMetadata/Condition": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadataAvailable"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...App.synth in aws-cdk-lib...",
+        "<anonymous> (D:\\abtesting\\dist\\ebook_ab\\app.js:16:5)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/EbookAbBudgetStack/Budgets/BudgetAlertTopic/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BudgetsBudgetAlertTopic10295880"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Topic2 in aws-cdk-lib...",
+        "new Budgets (D:\\abtesting\\dist\\ebook_ab\\budgets.js:12:27)",
+        "new BudgetStack (D:\\abtesting\\dist\\ebook_ab\\app.js:10:9)",
+        "<anonymous> (D:\\abtesting\\dist\\ebook_ab\\app.js:15:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/EbookAbBudgetStack/Budgets/BudgetAlertTopic/duqueandres800@gmail.com/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BudgetsBudgetAlertTopicduqueandres800gmailcomC86E3E01"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...PropertyInjectable.addSubscription in aws-cdk-lib...",
+        "new Budgets (D:\\abtesting\\dist\\ebook_ab\\budgets.js:17:25)",
+        "new BudgetStack (D:\\abtesting\\dist\\ebook_ab\\app.js:10:9)",
+        "<anonymous> (D:\\abtesting\\dist\\ebook_ab\\app.js:15:1)",
+        "...node internals..."
+      ]
+    }
+  ]
+}
