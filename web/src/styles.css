@@ -1,0 +1,293 @@
+/* L11: warm paper colors, dark mode, regular-weight type, pill buttons.
+   Fonts are named with system fallbacks so nothing is fetched from another origin.
+   ponytail: self-hosted Instrument Sans / EB Garamond / Geist Mono files drop in here
+   when the operator adds them; the stacks below already read correctly without them. */
+
+:root {
+  --paper: #fbf7f0;
+  --ink: #221e1a;
+  --muted: #6a625a;
+  --line: #e2d9cc;
+  --accent: #b4472a;
+  --card: #fffdf9;
+  --ok: #2f6b4f;
+  --warn: #8a5a12;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #16130f;
+    --ink: #f2ece3;
+    --muted: #a99e91;
+    --line: #332c25;
+    --accent: #e0794f;
+    --card: #1e1a15;
+    --ok: #7fc3a0;
+    --warn: #dfae63;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.lang select {
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+}
+
+.page {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+h1 {
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
+  font-weight: 500;
+  margin: 0 0 0.4rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem;
+}
+
+p {
+  margin: 0.4rem 0;
+}
+
+.lead {
+  color: var(--muted);
+  max-width: 44rem;
+}
+
+.doors {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  margin-top: 1.75rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+.door {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.door p {
+  color: var(--muted);
+  flex: 1;
+}
+
+.counter {
+  margin-top: 2rem;
+  color: var(--muted);
+}
+
+.pill {
+  display: inline-block;
+  align-self: flex-start;
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.pill[aria-disabled='true'],
+.pill:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pill.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.field {
+  display: block;
+  margin: 0.9rem 0;
+}
+
+.field > span {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+input[type='text'],
+input[type='url'],
+textarea,
+select {
+  width: 100%;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.row {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.4rem 0 0.9rem;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.verdict {
+  border-radius: 0.9rem;
+  padding: 1rem 1.1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.verdict.win {
+  border-color: var(--ok);
+}
+
+.verdict.warn {
+  border-color: var(--warn);
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.error {
+  color: var(--accent);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+details {
+  margin-top: 0.75rem;
+}
+
+summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.cover {
+  width: 100%;
+  max-width: 18rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--line);
+}
+
+.book {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 1.05rem;
+}
+
+.mono {
+  font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.88rem;
+  word-break: break-all;
+}
+
+/* D28: every number block wears a source badge. */
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  vertical-align: middle;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
