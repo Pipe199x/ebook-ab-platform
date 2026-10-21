@@ -1,0 +1,6 @@
+# Volume ops definition
+volumes:
+  lakehouse_files:
+    source: s3://my-bucket/lakehouse_files
+    format: delta
+    description: Lakehouse files volume for dev

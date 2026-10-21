@@ -1,5 +1,4 @@
-# Schemas definition
+# Schemas placeholder
 schemas:
   ebook_ab_dev:
-    comment: Development schema for ebook AB platform
-    # Add tables definitions as needed
+    description: Development schemas for ebook AB platform
