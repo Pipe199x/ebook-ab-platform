@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import DuelCreate from './pages/DuelCreate'
 import DuelVote from './pages/DuelVote'
 import DuelOwner from './pages/DuelOwner'
+import RealOrLuck from './pages/RealOrLuck'
 import Soon from './pages/Soon'
 
 function LangSwitcher() {
@@ -70,9 +71,9 @@ export function App() {
           <Route path="/d/:id" element={<DuelVote />} />
           {/* the writer's private link: progress + reveal */}
           <Route path="/duel/:id" element={<DuelOwner />} />
-          {/* doors that Phase 1 does not build yet (L3 is Phase 7, L4 is Phase 7) */}
+          <Route path="/real-or-luck" element={<RealOrLuck />} />
+          {/* the Ad Doctor (L3) is Phase 7; the door stays honest until then */}
           <Route path="/ad-doctor" element={<Soon />} />
-          <Route path="/real-or-luck" element={<Soon />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Shell>
